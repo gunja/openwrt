@@ -1745,6 +1745,7 @@ static int init_device(void)
 }
 
 static struct v4l2_subdev_video_ops ov5640_subdev_video_ops = {
+    //gunja Regardes á MOI!
 	//.g_parm = ov5640_g_parm,
 	//.s_parm = ov5640_s_parm,
 };

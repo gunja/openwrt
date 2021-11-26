@@ -820,18 +820,24 @@ static int mipi_csis_s_rx_buffer(struct v4l2_subdev *mipi_sd, void *buf,
 
 static int mipi_csis_s_parm(struct v4l2_subdev *mipi_sd, struct v4l2_streamparm *a)
 {
+	dev_dbg(mipi_sd->dev, "got call to mipi_csis_s_parm\n");
 	struct csi_state *state = mipi_sd_to_csi_state(mipi_sd);
 	struct v4l2_subdev *sensor_sd = state->sensor_sd;
 
-	return v4l2_subdev_call(sensor_sd, video, s_parm, a);
+    // gunja REGARDES Á MOI
+    return -ENOMEM;
+	//return v4l2_subdev_call(sensor_sd, video, s_parm, a);
 }
 
 static int mipi_csis_g_parm(struct v4l2_subdev *mipi_sd, struct v4l2_streamparm *a)
 {
+	dev_dbg(mipi_sd->dev, "got call to mipi_csis_g_parm\n");
 	struct csi_state *state = mipi_sd_to_csi_state(mipi_sd);
 	struct v4l2_subdev *sensor_sd = state->sensor_sd;
 
-	return v4l2_subdev_call(sensor_sd, video, g_parm, a);
+    // gunja REGARDES Á MOI
+    return -ENOMEM;
+	//return v4l2_subdev_call(sensor_sd, video, g_parm, a);
 }
 
 static int mipi_csis_enum_framesizes(struct v4l2_subdev *mipi_sd,
@@ -875,8 +881,8 @@ static struct v4l2_subdev_video_ops mipi_csis_video_ops = {
 	.s_rx_buffer = mipi_csis_s_rx_buffer,
 	.s_stream = mipi_csis_s_stream,
 
-	.s_parm = mipi_csis_s_parm,
-	.g_parm = mipi_csis_g_parm,
+	//.s_parm = mipi_csis_s_parm,
+	//.g_parm = mipi_csis_g_parm,
 };
 
 static const struct v4l2_subdev_pad_ops mipi_csis_pad_ops = {
@@ -943,7 +949,7 @@ static int subdev_notifier_bound(struct v4l2_async_notifier *notifier,
 	struct csi_state *state = notifier_to_mipi_dev(notifier);
 
 	/* Find platform data for this sensor subdev */
-	if (state->asd.match.fwnode.fwnode == dev_fwnode(subdev->dev))
+	if (state->asd.match.fwnode == dev_fwnode(subdev->dev))
 		state->sensor_sd = subdev;
 
 	if (subdev == NULL)
@@ -993,6 +999,12 @@ static int mipi_csis_parse_dt(struct platform_device *pdev,
 static int mipi_csis_pm_resume(struct device *dev, bool runtime);
 static const struct of_device_id mipi_csis_of_match[];
 
+
+static const struct v4l2_async_notifier_operations csi_notifier_ops = {
+	.bound		= subdev_notifier_bound,
+	.unbind		= NULL,
+};
+
 /* register parent dev */
 static int mipi_csis_subdev_host(struct csi_state *state)
 {
@@ -1019,16 +1031,29 @@ static int mipi_csis_subdev_host(struct csi_state *state)
 		}
 
 		state->asd.match_type = V4L2_ASYNC_MATCH_FWNODE;
-		state->asd.match.fwnode.fwnode = of_fwnode_handle(rem);
-		state->async_subdevs[0] = &state->asd;
+		state->asd.match.fwnode = of_fwnode_handle(rem);
+		//state->async_subdevs[0] = &state->asd;
 
 		of_node_put(rem);
 		break;
 	}
 
-	state->subdev_notifier.subdevs = state->async_subdevs;
-	state->subdev_notifier.num_subdevs = 1;
-	state->subdev_notifier.bound = subdev_notifier_bound;
+    v4l2_async_notifier_init(&state->subdev_notifier);
+    ret = v4l2_async_notifier_add_subdev(&state->subdev_notifier,
+            &state->asd);
+    
+	if (ret) {
+		dev_err(state->dev, "fail to register asd to notifier %d",
+			ret);
+		fwnode_handle_put(state->asd.match.fwnode);
+		return ret;
+	}
+	state->subdev_notifier.ops = &csi_notifier_ops;
+
+
+	//state->subdev_notifier.subdevs = state->async_subdevs;
+	//state->subdev_notifier.num_subdevs = 1;
+	//state->subdev_notifier.bound = subdev_notifier_bound;
 
 	ret = v4l2_async_notifier_register(&state->v4l2_dev,
 					&state->subdev_notifier);
