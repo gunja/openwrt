@@ -307,6 +307,7 @@ struct mx6s_csi_dev {
 	struct v4l2_device	v4l2_dev;
 
 	struct vb2_queue			vb2_vidq;
+   	struct mutex vb2_vidq_queue_lock;
 	struct v4l2_ctrl_handler	ctrl_handler;
 
 	struct mutex		lock;
@@ -1622,8 +1623,7 @@ static int mx6s_vidioc_g_parm(struct file *file, void *priv,
 	struct mx6s_csi_dev *csi_dev = video_drvdata(file);
 	struct v4l2_subdev *sd = csi_dev->sd;
 
-    return -ENODEV;
-	//return v4l2_subdev_call(sd, video, g_parm, a);
+	return v4l2_g_parm_cap(video_devdata(file), sd, a);
 }
 
 static int mx6s_vidioc_s_parm(struct file *file, void *priv,
@@ -1632,7 +1632,7 @@ static int mx6s_vidioc_s_parm(struct file *file, void *priv,
 	struct mx6s_csi_dev *csi_dev = video_drvdata(file);
 	struct v4l2_subdev *sd = csi_dev->sd;
 
-    return -ENODEV;
+    return v4l2_s_parm_cap(video_devdata(file), csi_dev->sd, a);
 	//return v4l2_subdev_call(sd, video, s_parm, a);
 }
 
@@ -1966,7 +1966,9 @@ static int mx6s_csi_probe(struct platform_device *pdev)
     //gunja
     vdev->device_caps = V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_STREAMING;
 
+    mutex_init(&csi_dev->vb2_vidq_queue_lock);
 	vdev->queue = &csi_dev->vb2_vidq;
+    vdev->queue->lock = &csi_dev->vb2_vidq_queue_lock;
 
 	csi_dev->vdev = vdev;
 
