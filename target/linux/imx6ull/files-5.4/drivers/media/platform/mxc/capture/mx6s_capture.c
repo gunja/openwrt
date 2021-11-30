@@ -1808,6 +1808,13 @@ static int mx6s_csi_two_8bit_sensor_mode_sel(struct mx6s_csi_dev *csi_dev)
 	return 0;
 }
 
+static const struct v4l2_async_notifier_operations csi_notifier_ops = {
+       .bound          = subdev_notifier_bound,
+       .unbind         = NULL,
+};
+
+
+
 static int mx6sx_register_subdevs(struct mx6s_csi_dev *csi_dev)
 {
 	struct device_node *parent = csi_dev->dev->of_node;
@@ -1843,6 +1850,16 @@ static int mx6sx_register_subdevs(struct mx6s_csi_dev *csi_dev)
 	//csi_dev->subdev_notifier.sd = csi_dev->async_subdevs;
 	//csi_dev->subdev_notifier.num_subdevs = 1;
 	//csi_dev->subdev_notifier.bound = subdev_notifier_bound;
+    v4l2_async_notifier_init(&csi_dev->subdev_notifier);
+    ret = v4l2_async_notifier_add_subdev(&csi_dev->subdev_notifier,
+        &csi_dev->asd);
+       if (ret) {
+               dev_err(csi_dev->dev, "fail to register asd to notifier %d",
+                       ret);
+               fwnode_handle_put(csi_dev->asd.match.fwnode);
+               return ret;
+       }
+    csi_dev->subdev_notifier.ops = &csi_notifier_ops;
 
 	ret = v4l2_async_notifier_register(&csi_dev->v4l2_dev,
 					&csi_dev->subdev_notifier);
@@ -1930,6 +1947,7 @@ static int mx6s_csi_probe(struct platform_device *pdev)
 	mutex_init(&csi_dev->lock);
 	spin_lock_init(&csi_dev->slock);
 
+		dev_err(dev, "before allocating memory\n");
 	/* Allocate memory for video device */
 	vdev = video_device_alloc();
 	if (vdev == NULL) {
@@ -1945,6 +1963,9 @@ static int mx6s_csi_probe(struct platform_device *pdev)
 	vdev->release		= video_device_release;
 	vdev->lock			= &csi_dev->lock;
 
+    //gunja
+    vdev->device_caps = V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_STREAMING;
+
 	vdev->queue = &csi_dev->vb2_vidq;
 
 	csi_dev->vdev = vdev;
@@ -1952,6 +1973,7 @@ static int mx6s_csi_probe(struct platform_device *pdev)
 	video_set_drvdata(csi_dev->vdev, csi_dev);
 	mutex_lock(&csi_dev->lock);
 
+		dev_err(dev, "before registering TYPE_GRABBER\n");
 	ret = video_register_device(csi_dev->vdev, VFL_TYPE_GRABBER, -1);
 	if (ret < 0) {
 		video_device_release(csi_dev->vdev);
