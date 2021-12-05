@@ -1,3 +1,4 @@
+#define DEBUG
 /*
  * Copyright (C) 2014-2016 Freescale Semiconductor, Inc. All Rights Reserved.
  */
@@ -1182,26 +1183,12 @@ static int mx6s_csi_open(struct file *file)
 {
 	struct mx6s_csi_dev *csi_dev = video_drvdata(file);
 	struct v4l2_subdev *sd = csi_dev->sd;
-	struct vb2_queue *q = &csi_dev->vb2_vidq;
 	int ret = 0;
 
 	file->private_data = csi_dev;
 
 	if (mutex_lock_interruptible(&csi_dev->lock))
 		return -ERESTARTSYS;
-
-	q->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	q->io_modes = VB2_MMAP | VB2_USERPTR;
-	q->drv_priv = csi_dev;
-	q->ops = &mx6s_videobuf_ops;
-	q->mem_ops = &vb2_dma_contig_memops;
-	q->buf_struct_size = sizeof(struct mx6s_buffer);
-	q->timestamp_flags = V4L2_BUF_FLAG_TIMESTAMP_MONOTONIC;
-	q->lock = &csi_dev->lock;
-
-	ret = vb2_queue_init(q);
-	if (ret < 0)
-		goto unlock;
 
 	pm_runtime_get_sync(csi_dev->dev);
 
@@ -1225,7 +1212,7 @@ static int mx6s_csi_close(struct file *file)
 
 	mutex_lock(&csi_dev->lock);
 
-	vb2_queue_release(&csi_dev->vb2_vidq);
+	//vb2_queue_release(&csi_dev->vb2_vidq);
 
 	mx6s_csi_deinit(csi_dev);
 	v4l2_subdev_call(sd, core, s_power, 0);
@@ -1876,6 +1863,7 @@ static int mx6s_csi_probe(struct platform_device *pdev)
 	const struct of_device_id *of_id;
 	struct mx6s_csi_dev *csi_dev;
 	struct video_device *vdev;
+    struct vb2_queue *q;
 	struct resource *res;
 	int ret = 0;
 
@@ -1966,9 +1954,25 @@ static int mx6s_csi_probe(struct platform_device *pdev)
     //gunja
     vdev->device_caps = V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_STREAMING;
 
-    mutex_init(&csi_dev->vb2_vidq_queue_lock);
+    //mutex_init(&csi_dev->vb2_vidq_queue_lock);
 	vdev->queue = &csi_dev->vb2_vidq;
-    vdev->queue->lock = &csi_dev->vb2_vidq_queue_lock;
+    //vdev->queue->lock = &csi_dev->vb2_vidq_queue_lock;
+
+    // initialization of vb2_queue is now inside _probe
+    
+	q = &csi_dev->vb2_vidq;
+	q->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	q->io_modes = VB2_MMAP | VB2_USERPTR;
+	q->drv_priv = csi_dev;
+	q->ops = &mx6s_videobuf_ops;
+	q->mem_ops = &vb2_dma_contig_memops;
+	q->buf_struct_size = sizeof(struct mx6s_buffer);
+	q->timestamp_flags = V4L2_BUF_FLAG_TIMESTAMP_MONOTONIC;
+	q->lock = &csi_dev->lock;
+
+	ret = vb2_queue_init(q);
+	if (ret < 0)
+		return ret;
 
 	csi_dev->vdev = vdev;
 
@@ -2018,6 +2022,7 @@ static int mx6s_csi_remove(struct platform_device *pdev)
 
 	video_unregister_device(csi_dev->vdev);
 	v4l2_device_unregister(&csi_dev->v4l2_dev);
+    vb2_queue_release(&csi_dev->vb2_vidq);
 
 	pm_runtime_disable(csi_dev->dev);
 	return 0;
