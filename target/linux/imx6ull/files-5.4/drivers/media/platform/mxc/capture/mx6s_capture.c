@@ -678,8 +678,7 @@ static int mx6s_videobuf_prepare(struct vb2_buffer *vb)
 	struct mx6s_csi_dev *csi_dev = vb2_get_drv_priv(vb->vb2_queue);
 	int ret = 0;
 
-	dev_dbg(csi_dev->dev, "%s (vb=0x%p) 0x%p %lu\n", __func__,
-		vb, vb2_plane_vaddr(vb, 0), vb2_get_plane_payload(vb, 0));
+	//dev_dbg(csi_dev->dev, "%s (vb=0x%p) 0x%p %lu\n", __func__, vb, vb2_plane_vaddr(vb, 0), vb2_get_plane_payload(vb, 0));
 
 #ifdef DEBUG
 	/*
@@ -711,8 +710,7 @@ static void mx6s_videobuf_queue(struct vb2_buffer *vb)
 	struct mx6s_buffer *buf = container_of(vbuf, struct mx6s_buffer, vb);
 	unsigned long flags;
 
-	dev_dbg(csi_dev->dev, "%s (vb=0x%p) 0x%p %lu\n", __func__,
-		vb, vb2_plane_vaddr(vb, 0), vb2_get_plane_payload(vb, 0));
+	//dev_dbg(csi_dev->dev, "%s (vb=0x%p) 0x%p %lu\n", __func__, vb, vb2_plane_vaddr(vb, 0), vb2_get_plane_payload(vb, 0));
 
 	spin_lock_irqsave(&csi_dev->slock, flags);
 
@@ -860,6 +858,8 @@ static int mx6s_configure_csi(struct mx6s_csi_dev *csi_dev)
 		pr_debug("   case not supported\n");
 		return -EINVAL;
 	}
+
+	dev_dbg(csi_dev->dev,  "mx6s_configure_csi  call to csi_set_imagpara  width=%d  heigth=%d \n", width,  pix->height);
 	csi_set_imagpara(csi_dev, width, pix->height);
 
 	if (csi_dev->csi_mipi_mode == true) {
@@ -1041,9 +1041,7 @@ static void mx6s_csi_frame_done(struct mx6s_csi_dev *csi_dev,
 					phys_fb1);
 			}
 		}
-		dev_dbg(csi_dev->dev, "%s (vb=0x%p) 0x%p %lu\n", __func__, vb,
-				vb2_plane_vaddr(vb, 0),
-				vb2_get_plane_payload(vb, 0));
+		//dev_dbg(csi_dev->dev, "%s (vb=0x%p) 0x%p %lu\n", __func__, vb,	vb2_plane_vaddr(vb, 0), vb2_get_plane_payload(vb, 0));
 
 		list_del_init(&buf->internal.queue);
 		vb->timestamp =ktime_get_ns();
@@ -1463,8 +1461,7 @@ static int mx6s_vidioc_s_fmt_vid_cap(struct file *file, void *priv,
 	csi_dev->pix.sizeimage = f->fmt.pix.sizeimage;
 	csi_dev->pix.field     = f->fmt.pix.field;
 	csi_dev->type          = f->type;
-	dev_dbg(csi_dev->dev, "set to pixelformat '%4.6s'\n",
-			(char *)&csi_dev->fmt->name);
+	dev_dbg(csi_dev->dev,  "mx6s_vidioc_s_fmt_vid_cap   set to pixelformat '%4.6s' width=%d  heigth=%d \n",  (char *)&csi_dev->fmt->name, csi_dev->pix.width,  csi_dev->pix.height);
 
 	/* Config csi */
 	mx6s_configure_csi(csi_dev);
