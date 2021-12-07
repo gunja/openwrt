@@ -1,3 +1,4 @@
+#define DEBUG
 /*
  * Copyright (C) 2012-2015 Freescale Semiconductor, Inc. All Rights Reserved.
  */
@@ -1575,6 +1576,8 @@ static int ov5640_set_fmt(struct v4l2_subdev *sd,
 	struct i2c_client *client = v4l2_get_subdevdata(sd);
 	struct ov5640 *sensor = to_ov5640(client);
 
+pr_info("entered ov5640_set_fmt with format->pad == %d and format->which  = %d (checked for === 0)\n", format->pad, format->which);
+
 	if (format->pad)
 		return -EINVAL;
 
@@ -1748,6 +1751,12 @@ static struct v4l2_subdev_video_ops ov5640_subdev_video_ops = {
     //gunja Regardes á MOI!
 	//.g_parm = ov5640_g_parm,
 	//.s_parm = ov5640_s_parm,
+/*
+      .g_frame_interval = ov5640_g_frame_interval,
+      .s_frame_interval = ov5640_s_frame_interval,
+      .s_stream = ov5640_s_stream,
+
+*/
 };
 
 static const struct v4l2_subdev_pad_ops ov5640_subdev_pad_ops = {
@@ -1896,7 +1905,7 @@ static int ov5640_probe(struct i2c_client *client,
 		dev_err(&client->dev,
 					"%s--Async register failed, ret=%d\n", __func__, retval);
 
-	pr_info("camera ov5640, is found\n");
+	pr_info("camera ov5640, is found and set default %dx%d@%d\n", ov5640_data.pix.width, ov5640_data.pix.height, ov5640_data.streamcap.timeperframe.denominator );
 	return retval;
 }
 
