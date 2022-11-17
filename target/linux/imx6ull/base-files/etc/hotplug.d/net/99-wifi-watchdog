@@ -1,0 +1,4 @@
+#!/bin/sh
+if [ "${ACTION}" = "add" -a "${DEVICENAME}" = "sta0" ]; then
+	/etc/wifi-watchdog.sh "${INTERFACE}"
+fi

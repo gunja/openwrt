@@ -1,0 +1,37 @@
+diff -Nru u-boot-2017.07-001/board/freescale/wirelessroad_ecspi3/Kconfig u-boot-2017.07-002-generic_ecspi3/board/freescale/wirelessroad_ecspi3/Kconfig
+--- u-boot-2017.07-001/board/freescale/wirelessroad_ecspi3/Kconfig	1970-01-01 03:00:00.000000000 +0300
++++ u-boot-2017.07-002-generic_ecspi3/board/freescale/wirelessroad_ecspi3/Kconfig	2020-03-28 01:12:10.889981668 +0200
+@@ -0,0 +1,12 @@
++if TARGET_MX6ULL_WIRELESSROAD_ECSPI3
++
++config SYS_BOARD
++	default "wirelessroad_ecspi3"
++
++config SYS_VENDOR
++	default "freescale"
++
++config SYS_CONFIG_NAME
++	default "wirelessroad_ecspi3"
++
++endif
+diff -Nru u-boot-2017.07-001/board/freescale/wirelessroad_ecspi3/MAINTAINERS u-boot-2017.07-002-generic_ecspi3/board/freescale/wirelessroad_ecspi3/MAINTAINERS
+--- u-boot-2017.07-001/board/freescale/wirelessroad_ecspi3/MAINTAINERS	1970-01-01 03:00:00.000000000 +0300
++++ u-boot-2017.07-002-generic_ecspi3/board/freescale/wirelessroad_ecspi3/MAINTAINERS	2020-03-19 04:47:08.202714768 +0200
+@@ -0,0 +1,7 @@
++MX6ULEVK BOARD
++M:	Peng Fan <peng.fan@nxp.com>
++S:	Maintained
++F:	board/freescale/mx6ul_14x14_evk/
++F:	include/configs/mx6ul_14x14_evk.h
++F:	configs/mx6ul_14x14_evk_defconfig
++F:	configs/mx6ul_9x9_evk_defconfig
+diff -Nru u-boot-2017.07-001/board/freescale/wirelessroad_ecspi3/Makefile u-boot-2017.07-002-generic_ecspi3/board/freescale/wirelessroad_ecspi3/Makefile
+--- u-boot-2017.07-001/board/freescale/wirelessroad_ecspi3/Makefile	1970-01-01 03:00:00.000000000 +0300
++++ u-boot-2017.07-002-generic_ecspi3/board/freescale/wirelessroad_ecspi3/Makefile	2020-03-28 01:12:18.886977602 +0200
+@@ -0,0 +1,6 @@
++# (C) Copyright 2015 Freescale Semiconductor, Inc.
++#
++# SPDX-License-Identifier:	GPL-2.0+
++#
++
++obj-y  := wirelessroad_ecspi3.o

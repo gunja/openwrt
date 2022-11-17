@@ -1,0 +1,28 @@
+!/bin/sh
+#
+# Copyright (C) 2013-2015 OpenWrt.org
+#
+
+. /lib/functions/uci-defaults.sh
+
+board=$(board_name)
+
+board_config_update
+
+case "$board" in
+lorawan_gateway_ethernet |\
+lorawan_gateway_ethernet_bridged)
+	uci delete network.lan
+	uci delete network.@device[0]
+	uci delete network.globals
+	uci set network.lan=interface
+	uci set network.lan.proto='dhcp'
+	uci set network.lan.device='eth0'
+	/etc/init.d/network restart
+	;;
+esac
+
+board_config_flush
+
+exit 0
+

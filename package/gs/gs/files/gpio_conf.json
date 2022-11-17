@@ -1,0 +1,71 @@
+{
+	"gpios": [
+		{
+			"controller_number": "4",
+			"pad_number": "11",
+			"direction": "out",
+			"alias": "K6"
+		},
+		{
+			"controller_number": "4",
+			"pad_number": "14",
+			"direction": "out",
+			"alias": "K5"
+		},
+		{
+			"controller_number": "4",
+			"pad_number": "9",
+			"direction": "out",
+			"alias": "K4"
+		},
+		{
+			"controller_number": "4",
+			"pad_number": "8",
+			"direction": "out",
+			"alias": "K3"
+		},
+		{
+			"controller_number": "4",
+			"pad_number": "7",
+			"direction": "out",
+			"alias": "K2"
+		},
+		{
+			"controller_number": "1",
+			"pad_number": "5",
+			"direction": "out",
+			"alias": "K1"
+		},
+		{
+			"controller_number": "1",
+			"pad_number": "9",
+			"direction": "out",
+			"alias": "Warm"
+		},
+		{
+			"controller_number": "1",
+			"pad_number": "4",
+			"direction": "out",
+			"alias": "Light"
+		},
+		{
+			"controller_number": "1",
+			"pad_number": "1",
+			"direction": "out",
+			"alias": "Warm 2"
+		},
+		{
+			"controller_number": "1",
+			"pad_number": "0",
+			"direction": "out",
+			"alias": "Light 2"
+		},
+		{
+			"controller_number": "4",
+			"pad_number": "1",
+			"direction": "out",
+			"default_value": "1",
+			"alias": "BUZZ"
+		}
+	]
+}

@@ -1,0 +1,36 @@
+#!/bin/sh
+#
+# Copyright (C) 2013-2015 OpenWrt.org
+#
+
+. /lib/functions/uci-defaults.sh
+
+board=$(board_name)
+
+board_config_update
+
+case "$board" in
+lorawan_gateway_ethernet|\
+lorawan_gateway_ethernet_bridged|\
+lorawan_gateway_wifi|\
+lorawan_gateway_3g|\
+video_stream_ethernet|\
+video_stream_3g|\
+video_stream_wifi|\
+tensorflow_wifi|\
+flexcan_ethernet|\
+flexcan_3g|\
+flexcan_wifi|\
+amazon_voice_service_wifi|\
+amazon_voice_service_3g|\
+amazon_voice_service|\
+audio_stream_ethernet|\
+audio_stream_3g|\
+audio_stream_wifi)
+	ucidef_set_interface_lan 'eth0'
+	;;
+esac
+
+board_config_flush
+
+exit 0

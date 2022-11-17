@@ -155,8 +155,8 @@ detect_mac80211() {
 		[ "$found" -gt 0 ] && continue
 
 		mode_band=""
-		channel=""
-		htmode=""
+		channel="11"
+		htmode="HT20"
 		ht_capab=""
 
 		get_band_defaults "$dev"
@@ -175,7 +175,8 @@ detect_mac80211() {
 			set wireless.radio${devidx}.channel=${channel}
 			set wireless.radio${devidx}.band=${mode_band}
 			set wireless.radio${devidx}.htmode=$htmode
-			set wireless.radio${devidx}.disabled=1
+			set wireless.radio${devidx}.noscan=1
+			set wireless.radio${devidx}.short_preamble=1
 
 			set wireless.default_radio${devidx}=wifi-iface
 			set wireless.default_radio${devidx}.device=radio${devidx}

@@ -1,0 +1,44 @@
+#!/bin/sh
+#
+# Copyright (C) 2013-2015 OpenWrt.org
+#
+
+. /lib/functions/uci-defaults.sh
+
+board=$(board_name)
+
+board_config_update
+
+case "$board" in
+video_stream_wifi|\
+audio_stream_wifi|\
+flexcan_wifi|\
+lorawan_gateway_wifi)
+	touch /etc/config/wireless;
+	uci set wireless.default_radio0=wifi-iface
+	uci set wireless.@wifi-iface[0].mode="ap";
+	uci set wireless.@wifi-iface[0].network="lan";
+#	touch /etc/config/network;
+#	uci set network.wlan='interface';
+#	uci set network.wlan.proto='dhcp';
+	uci commit;
+	;;
+*)
+	;;
+esac
+
+case "$board" in
+gs)
+	uci set wireless.@wifi-iface[0].hidden="1";
+	uci set wireless.@wifi-iface[0].ssid="openwrt";
+	uci set wireless.@wifi-iface[0].encryption="psk2";
+	uci set wireless.@wifi-iface[0].key="12345678";
+	uci commit;
+	;;
+*)
+	;;
+esac
+
+board_config_flush
+
+exit 0

@@ -1,0 +1,40 @@
+diff -Nru linux-5.4.158_orig/drivers/mtd/spi-nor/spi-nor.c linux-5.4.158/drivers/mtd/spi-nor/spi-nor.c
+--- linux-5.4.158_orig/drivers/mtd/spi-nor/spi-nor.c	2021-11-21 03:41:58.304484959 +0400
++++ linux-5.4.158/drivers/mtd/spi-nor/spi-nor.c	2021-11-21 03:46:58.795181011 +0400
+@@ -4930,6 +4930,27 @@
+ 	return info;
+ }
+ 
++void spi_nor_reboot(struct mtd_info *mtd)
++{
++	struct spi_nor *sp;
++	u8 code;
++	int rc;
++
++	sp = container_of(mtd, struct spi_nor, mtd);
++
++	printk("m25p_reboot JEDEC\n");
++
++	code = 0x66; // OPCODE_RESET_ENABLE
++	rc = spi_write_then_read(sp->spimem->spi, &code, 1, NULL, 0);
++	printk("m25p reset enable = %d\n", rc);
++
++	code = 0x99; // OPCODE_RESET_MEMORY
++	rc = spi_write_then_read(sp->spimem->spi, &code, 1, NULL, 0);
++	printk("m25p reset memory = %d\n", rc);
++
++	return;
++}
++
+ int spi_nor_scan(struct spi_nor *nor, const char *name,
+ 		 const struct spi_nor_hwcaps *hwcaps)
+ {
+@@ -5011,6 +5032,8 @@
+ 	mtd->_read = spi_nor_read;
+ 	mtd->_resume = spi_nor_resume;
+ 
++    mtd->_reboot = spi_nor_reboot;
++
+ 	if (nor->params.locking_ops) {
+ 		mtd->_lock = spi_nor_lock;
+ 		mtd->_unlock = spi_nor_unlock;

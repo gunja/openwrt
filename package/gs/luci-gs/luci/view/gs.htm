@@ -1,0 +1,444 @@
+<%+header%>
+
+<script type="text/javascript">
+
+function handleSubmit(ev){
+        let rows = document.getElementById("table").children
+
+        let data = { token: '<%=token%>', gpios: [] };
+        var xhr = new XHR();
+
+        for (let i = 1; i < rows.length; i++) {
+                let fields = rows[i].children
+                const gpio = {
+                        'controller_number': fields[0].children[0].value,
+                        'pad_number': fields[1].children[0].value,
+                        'direction': fields[2].children[0].value
+                }
+                data.gpios.push(gpio)
+        }
+
+        xhr.post("/cgi-bin/luci/admin/gs/configuration_set", data, function(xhr,j){
+                                setTimeout(get_show_data, 1500)
+                        }
+                )
+ }
+
+function get_show_data(){
+
+         XHR.get('/cgi-bin/luci/admin/gs/configuration_get', { token: '<%=token%>' }, function(xhr, j) {
+                let table = document.getElementById("table")
+                while(table.firstChild)
+                {
+                        table.removeChild(table.lastChild)
+                }
+                // gpio_cnt = 0
+                generateGpioHead(table);
+
+                let telemetry = document.getElementById("telemetry")
+                while(telemetry.firstChild)
+                {
+                        telemetry.removeChild(telemetry.lastChild)
+                }
+                generateTelemetryHead(telemetry)
+
+                let settings_left = document.getElementById("settings_left")
+                while(settings_left.firstChild)
+                {
+                        settings_left.removeChild(settings_left.lastChild)
+                }
+                generateSettingsLeftHead(settings_left)
+
+                let settings_right = document.getElementById("settings_right")
+                while(settings_right.firstChild)
+                {
+                        settings_right.removeChild(settings_right.lastChild)
+                }
+                generateSettingsRightHead(settings_right)
+
+                XHR.get('/cgi-bin/luci/admin/gs/state_get', { token: '<%=token%>' }, function(xhr, resp) {
+                        let gpios = resp.gpios
+                        let len = gpios.length
+                        for (let k = 0; k < len; k++) {
+                                const idd = gpios[k].controller_number + '.' + gpios[k].pad_number
+                                const valuee = gpios[k].value
+
+                                 generateGpio(gpios[k].controller_number,
+                                         gpios[k].pad_number,
+                                         gpios[k].direction,
+                                         parseInt(valuee),
+                                         gpios[k].alias
+                                 )
+                        }
+
+                        let telemetry = resp.telemetry
+                        len = telemetry.length
+                        for (let k = 0; k < len; k++) {
+                                 generateParam(telemetry[k].name,
+                                         telemetry[k].value
+                                 )
+                        }
+
+                        let settings_left = resp.settings_left
+                        len = settings_left.length
+                        for (let k = 0; k < len; k++) {
+                                 generateSettings("settings_left",
+                                         settings_left[k].name,
+                                         settings_left[k].value,
+                                         settings_left[k].label,
+                                         settings_left[k].explanation,
+                                         settings_left[k].field_type,
+                                         settings_left[k].field_options
+                                 )
+                        }
+
+                        let settings_right = resp.settings_right
+                        len = settings_right.length
+                        for (let k = 0; k < len; k++) {
+                                 generateSettings("settings_right",
+                                         settings_right[k].name,
+                                         settings_right[k].value,
+                                         settings_right[k].label,
+                                         settings_right[k].explanation,
+                                         settings_right[k].field_type,
+                                         settings_right[k].field_options
+                                 )
+                        }
+
+                })
+         });
+
+         XHR.get('/cgi-bin/luci/admin/gs/firmware_version_get', { token: '<%=token%>' }, function(xhr, resp) {
+                 let title = document.getElementById("fw_ver")
+                 console.log("resp: ", resp)
+                 title.innerText = "Версия прошивки: " + resp.version
+         });
+}
+
+function generateHeadField(class_name, text) {
+        let col = document.createElement("div")
+        col.className = class_name
+        let col_text = document.createTextNode(text)
+        col.appendChild(col_text)
+        return col
+}
+
+function generateParamOption(class_name, text)  {
+        let col = document.createElement("div")
+        col.className = class_name
+        col.appendChild(text)
+        return col
+}
+
+function generateSettingsOption(class_name, text, explanation)  {
+        let x = document.createElement("div")
+        x.className = "tooltip"
+        x.innerText = text
+        let y = document.createElement("span")
+        y.className = "tooltiptext"
+        y.innerText = explanation
+        x.appendChild(y)
+        return x
+        // return text
+}
+
+function generateSettingsField(class_name, text, field_type, field_options)  {
+        if(field_type === "text") {
+                let col0 = document.createElement("div")
+                col0.className = "td"
+                col0.contentEditable = "true"
+                col0.innerText = text
+                return col0
+        } else if(field_type === "dropdown") {
+                let col = document.createElement("div")
+                col.className = "td"
+                let col0 = document.createElement("select")
+                col0.className = "dropdown"
+                for(const [val, label] of Object.entries(field_options)) {
+                        let opt = new Option(label, val)
+                        if(val === text) {
+                                opt.setAttribute('selected', 'selected')
+                        }
+                        col0.appendChild(opt);
+                }
+                col.appendChild(col0)
+                return col
+        } else {
+        }
+}
+
+function settingsButtonClick(evt) {
+        row = document.getElementById(evt.currentTarget.myParam)
+        let childs = Array.from(row.childNodes)
+        let child = childs[1].childNodes[0]
+        let value = 'unknown'
+        if(child.options === undefined) {
+                value = childs[1].innerText
+        } else {
+                value = child.value
+        }
+        let data = {
+                token: '<%=token%>',
+                side: evt.currentTarget.myParam.split('.')[0],
+                param: evt.currentTarget.myParam.split('.')[1],
+                value: value
+        }
+
+        var xhr = new XHR();
+
+        xhr.post("/cgi-bin/luci/admin/gs/settings_set", data, function(xhr,j){
+                        if((j !== null) && (j[0].result === 'ok')) {
+                                window.alert("value changed to " + j[0].value)
+                        } else {
+                                window.alert("something wrong: " + xhr.responseText)
+                        }
+                }
+        )
+}
+
+function generateSettingsButton(class_name, row_id)  {
+        let col = document.createElement("BUTTON")
+        // col.setAttribute("type", "button");
+        col.className = class_name
+        col.innerText = 'change'
+        col.myParam = row_id
+        col.addEventListener("click", settingsButtonClick)
+        return col
+}
+
+function generateGpioOption(class_name, text)  {
+        let col = document.createElement("div")
+        col.className = class_name
+        col.appendChild(text)
+        return col
+}
+
+function generateGpioValue(class_name, text)  {
+        let col = document.createElement("div")
+        col.className = class_name
+        col.appendChild(text)
+        return col
+}
+
+function generateGpioAlias(value = '') {
+        text = document.createTextNode(value)
+        return text
+}
+
+function generateParamName(value = '') {
+        text = document.createTextNode(value)
+        return text
+}
+
+function generateParamValue(value = '') {
+        text = document.createTextNode(value)
+        return text
+}
+
+function generateSettingsName(value = '') {
+        // text = document.createTextNode(value)
+        // return text
+        return value
+}
+
+function generateSettingsValue(value = '') {
+        // text = document.createTextNode(value)
+        // return text
+        return value
+}
+
+function gpioToggled(e) {
+        const cnt = e.target.id.split('.')[1]
+        // console.log(e.target.id, e.target.checked)
+        let data = { token: '<%=token%>', gpio: {} };
+        var xhr = new XHR();
+        data.gpio.controller_number = e.target.id.split('.')[1] // controller
+        data.gpio.pad_number = e.target.id.split('.')[2]  // pad
+        data.gpio.value = e.target.checked ? 1 : 0
+
+        xhr.post("/cgi-bin/luci/admin/gs/value_set", data, function(xhr,j) {
+                }
+        );
+}
+
+function generateGpioVal(controller_number, gpio_number, direction, value = 1, idd) {
+        let label = document.createElement("label")
+        label.className = "switch"
+        let input = document.createElement("input")
+        input.type = "checkbox"
+        input.id = 'value.' + idd
+        input.addEventListener('input', gpioToggled)
+        input.checked = !!value
+        let span = document.createElement("span")
+        span.className = "slider round"
+        label.appendChild(input)
+        label.appendChild(span)
+        return label
+}
+
+function generateGpioNew() {
+        generateGpio(controller_number = 1, gpio_number = 1, direction = 'out', value = 0, alias = '', disabled = true)
+}
+
+function generateGpio(controller_number = 1, gpio_number = 1, direction = 'out', value = 0, alias = '', disabled = false) {
+        let table = document.getElementById("table")
+        let trow = document.createElement("div")
+        trow.className = "tr"
+        trow.id = controller_number + '.' + gpio_number
+
+        table.appendChild(trow)
+        trow.appendChild(generateGpioOption("td", generateGpioAlias(alias)))
+        if(disabled === false) {
+                trow.appendChild(generateGpioValue("td center", generateGpioVal(controller_number, gpio_number, direction, value, /*gpio_cnt*/trow.id)))
+        } else {
+                trow.appendChild(generateGpioValue("td center disabled", generateGpioVal(controller_number, gpio_number, direction, value, /*gpio_cnt*/trow.id)))
+        }
+}
+
+function generateParam(name, value) {
+        let table = document.getElementById("telemetry")
+        let trow = document.createElement("div")
+        trow.className = "tr"
+        trow.id = 'param.' + name
+
+        table.appendChild(trow)
+        trow.appendChild(generateParamOption("td", generateParamName(name)))
+        trow.appendChild(generateParamOption("td", generateParamValue(value)))
+}
+
+function generateSettings(id, name, value, label, explanation, field_type, field_options) {
+        let table = document.getElementById(id)
+        let trow = document.createElement("div")
+        trow.className = "trb"
+        trow.id = id + '.' + name
+
+        table.appendChild(trow)
+        trow.appendChild(generateSettingsOption("td", generateSettingsName(label), explanation))
+        trow.appendChild(generateSettingsField("tdfield", generateSettingsValue(value), field_type, field_options))
+        trow.appendChild(generateSettingsButton("tdbutton", trow.id))
+}
+
+function generateGpioHead(table) {
+        let thead = document.createElement("div")
+        thead.className = "tr table-titles"
+        table.appendChild(thead)
+
+        thead.appendChild(generateHeadField("th col-1 middle center", "Alias"))
+        thead.appendChild(generateHeadField("th col-2 middle center", "Value"))
+}
+
+function generateTelemetryHead(table) {
+        let thead = document.createElement("div")
+        thead.className = "tr table-titles"
+        table.appendChild(thead)
+        thead.appendChild(generateHeadField("th col-1 middle center", "Parameter"))
+        thead.appendChild(generateHeadField("th col-2 middle center", "Raw value"))
+}
+
+function generateSettingsLeftHead(table) {
+        let thead = document.createElement("div")
+        thead.className = "tr table-titles"
+        table.appendChild(thead)
+        thead.appendChild(generateHeadField("th col-1 middle center", "Name"))
+        thead.appendChild(generateHeadField("th col-1 middle center", "Value"))
+        thead.appendChild(generateHeadField("th col-1 middle center", "Change"))
+}
+
+function generateSettingsRightHead(table) {
+        let thead = document.createElement("div")
+        thead.className = "tr table-titles"
+        table.appendChild(thead)
+        thead.appendChild(generateHeadField("th col-1 middle center", "Name"))
+        thead.appendChild(generateHeadField("th col-1 middle center", "Value"))
+        thead.appendChild(generateHeadField("th col-1 middle center", "Change"))
+}
+
+window.requestAnimationFrame(function() {
+        let table = document.getElementById("table")
+        get_show_data();
+
+        setInterval(function () {
+                let rows = document.getElementById("table").children
+                let telemetry_rows = document.getElementById("telemetry").children
+                let settings_left_rows = document.getElementById("settings_left").children
+                let settings_right_rows = document.getElementById("settings_right").children
+
+                XHR.get('/cgi-bin/luci/admin/gs/state_get', { token: '<%=token%>' }, function(xhr, resp) {
+                        let gpios = resp.gpios
+                        let len = gpios.length
+                        for (let k = 0; k < len; k++) {
+                                const idd = gpios[k].controller_number + '.' + gpios[k].pad_number
+                                const valuee = gpios[k].value
+                                for (let i = 1; i < rows.length; i++) {
+                                        let row = rows[i]
+                                        if (idd === row.id) {
+                                                let value = document.getElementById("value." + idd)
+                                                const new_val = (valuee === '1') ? true : false
+                                                if (value.checked !== new_val) {
+                                                        value.checked = new_val
+                                                }
+                                        }
+                                }
+                        }
+
+                        let telemetry = resp.telemetry
+                        len = telemetry.length
+                        for (let k = 0; k < len; k++) {
+                                const idd = 'param.' + telemetry[k].name
+                                const valuee = telemetry[k].value
+                                for (let i = 1; i < telemetry_rows.length; i++) {
+                                        let row = telemetry_rows[i]
+                                        if (idd === row.id) {
+                                                let node = row.childNodes[1]
+                                                node.textContent = valuee
+                                        }
+                                }
+                        }
+
+                        // let settings_left = resp.settings_left
+                        // len = settings_left.length
+                        // for (let k = 0; k < len; k++) {
+                        //         const idd = 'settings_left.' + settings_left[k].name
+                        //         const valuee = settings_left[k].value
+                        //         for (let i = 1; i < settings_left_rows.length; i++) {
+                        //                 let row = settings_left_rows[i]
+                        //                 if (idd === row.id) {
+                        //                         let node = row.childNodes[1]
+                        //                         if (node.innerText !== valuee) {
+                        //                                 node.innerText = valuee
+                        //                         }
+                        //                 }
+                        //         }
+                        // }
+
+                })
+        },1500)
+
+});
+
+</script>
+
+<div style="display: flex; flex-direction: row; justify-content: space-between">
+        <div id="fw_ver" style="font-size: 24px">Версия прошивки: 1.00</div>
+<!--        <h2 name="content"><%:GPIO Configuration%></h2>-->
+<!--        <h2 name="content2">Telemetry</h2>-->
+<!--        <button class="btn cbi-button cbi-button-action" onclick="generateGpioNew()"> <%:Add Gpio %> </button>-->
+</div>
+
+
+<div style="display: flex; flex-direction: row">
+        <link rel="stylesheet" href="<%=resource%>/gs.css" type="text/css" />
+        <div style="flex: 1; width: 100%">
+                <h2 name="content">Настройки Поста №1</h2>
+                <div id="settings_left" class="table"></div>
+                <h2 name="content">Блок проверки реле клапанов</h2>
+                <div id="table" class="table"></div>
+        </div>
+        <div style="flex: 1; width: 100%; margin-left: 10px">
+                <h2 name="content">Настройки Поста №2</h2>
+                <div id="settings_right" class="table"></div>
+                <h2 name="content">Датчики</h2>
+                <div id="telemetry" class="table"></div>
+        </div>
+</div>
+<br>

@@ -207,7 +207,7 @@ proto_qmi_setup() {
 		echo "Y" > /sys/class/net/$ifname/qmi/raw_ip
 	fi
 
-	uqmi -s -d "$device" --sync > /dev/null 2>&1
+	#uqmi -s -d "$device" --sync > /dev/null 2>&1
 
 	uqmi -s -d "$device" --network-register > /dev/null 2>&1
 

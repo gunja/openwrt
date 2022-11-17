@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# Copyright (C) 2013-2015 OpenWrt.org
+#
+
+. /lib/functions/uci-defaults.sh
+
+board=$(board_name)
+
+board_config_update
+
+case "$board" in
+lorawan_gateway_ethernet|\
+lorawan_gateway_wifi)
+	uci set lora.SX1301_conf.chipreset_pin='135';
+	uci set lora.SX1301_conf.pllreset_pin='';
+	;;
+*)
+	;;
+esac
+
+uci commit;
+
+board_config_flush
+
+exit 0

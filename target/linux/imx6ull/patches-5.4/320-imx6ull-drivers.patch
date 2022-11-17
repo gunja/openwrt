@@ -1,0 +1,55 @@
+--- a/drivers/crypto/mxs-dcp.c
++++ b/drivers/crypto/mxs-dcp.c
+@@ -20,7 +20,8 @@
+ #include <linux/of.h>
+ #include <linux/platform_device.h>
+ #include <linux/stmp_device.h>
+ #include <linux/clk.h>
++#include <linux/crypto.h>
+ 
+ #include <crypto/aes.h>
+ #include <crypto/sha.h>
+--- a/drivers/pinctrl/freescale/pinctrl-imx6ul.c
++++ b/drivers/pinctrl/freescale/pinctrl-imx6ul.c
+@@ -12,6 +12,7 @@
+ #include <linux/err.h>
+ #include <linux/init.h>
+ #include <linux/io.h>
++#include <linux/module.h>
+ #include <linux/of.h>
+ #include <linux/of_device.h>
+ #include <linux/pinctrl/pinctrl.h>
+@@ -312,3 +362,13 @@ static int __init imx6ul_pinctrl_init(vo
+ 	return platform_driver_register(&imx6ul_pinctrl_driver);
+ }
+ arch_initcall(imx6ul_pinctrl_init);
++
++static void __exit imx6ul_pinctrl_exit(void)
++{
++	platform_driver_unregister(&imx6ul_pinctrl_driver);
++}
++module_exit(imx6ul_pinctrl_exit);
++
++MODULE_AUTHOR("Anson Huang <Anson.Huang@freescale.com>");
++MODULE_DESCRIPTION("Freescale imx6ul pinctrl driver");
++MODULE_LICENSE("GPL v2");
+--- a/drivers/spi/spi-imx.c
++++ b/drivers/spi/spi-imx.c
+@@ -258,6 +258,7 @@ static bool spi_imx_can_dma(struct spi_m
+ #define MX51_ECSPI_CONFIG_SCLKPOL(cs)	(1 << ((cs) +  4))
+ #define MX51_ECSPI_CONFIG_SBBCTRL(cs)	(1 << ((cs) +  8))
+ #define MX51_ECSPI_CONFIG_SSBPOL(cs)	(1 << ((cs) + 12))
++#define MX51_ECSPI_CONFIG_DATAPOL(cs)	(1 << ((cs) + 16))
+ #define MX51_ECSPI_CONFIG_SCLKCTL(cs)	(1 << ((cs) + 20))
+ 
+ #define MX51_ECSPI_INT		0x10
+@@ -466,6 +467,9 @@ static int mx51_ecspi_prepare_message(st
+ 	/* set chip select to use */
+ 	ctrl |= MX51_ECSPI_CTRL_CS(spi->chip_select);
+ 
++	/* Keep datalines low on inactive state. */
++	cfg |= MX51_ECSPI_CONFIG_DATAPOL(spi->chip_select);
++
+ 	/*
+ 	 * The ctrl register must be written first, with the EN bit set other
+ 	 * registers must not be written to.

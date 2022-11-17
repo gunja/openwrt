@@ -78,6 +78,36 @@ endef
 
 $(eval $(call KernelPackage,iio-ad799x))
 
+define KernelPackage/iio-ads1015
+  SUBMENU:=$(IIO_MENU)
+  DEPENDS:=+kmod-i2c-core +kmod-iio-core +kmod-regmap-i2c +kmod-industrialio-triggered-buffer
+  TITLE:=Texas Instruments ADS1015 ADC driver
+  KCONFIG:= CONFIG_TI_ADS1015
+  FILES:=$(LINUX_DIR)/drivers/iio/adc/ti-ads1015.ko
+  AUTOLOAD:=$(call AutoLoad,56,ti-ads1015)
+endef
+
+define KernelPackage/iio-ads1015/description
+ This driver adds support for Texas Instruments ADS1015 and ADS1115 ADCs.
+endef
+
+$(eval $(call KernelPackage,iio-ads1015))
+
+define KernelPackage/iio-vf610-adc
+  SUBMENU:=$(IIO_MENU)
+  DEPENDS:=+kmod-iio-core kmod-industrialio-triggered-buffer
+  TITLE:= Freescale ADC driver
+  KCONFIG:= CONFIG_VF610_ADC
+  FILES:=$(LINUX_DIR)/drivers/iio/adc/vf610_adc.ko
+  AUTOLOAD:=$(call AutoLoad,56,vf610_adc)
+endef
+
+define KernelPackage/iio-vf610-adc/description
+ This driver adds support for Freescale GPIO ADC.
+endef
+
+$(eval $(call KernelPackage,iio-vf610-adc))
+
 define KernelPackage/iio-hmc5843
   SUBMENU:=$(IIO_MENU)
   DEPENDS:=+kmod-i2c-core +kmod-iio-core +kmod-regmap-i2c +kmod-industrialio-triggered-buffer

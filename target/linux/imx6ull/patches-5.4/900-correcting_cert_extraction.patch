@@ -1,0 +1,11 @@
+--- linux-5.4.158_orig/scripts/Makefile	2021-11-21 01:07:19.231653310 +0400
++++ linux-5.4.158/scripts/Makefile	2021-11-21 00:49:16.468510490 +0400
+@@ -29,7 +29,7 @@
+ HOSTCFLAGS_sign-file.o = $(CRYPTO_CFLAGS)
+ HOSTLDLIBS_sign-file = $(CRYPTO_LIBS)
+ HOSTCFLAGS_extract-cert.o = $(CRYPTO_CFLAGS)
+-HOSTLDLIBS_extract-cert = $(CRYPTO_LIBS)
++HOSTLDLIBS_extract-cert = $(CRYPTO_LIBS) -lpthread
+ 
+ always		:= $(hostprogs-y) $(hostprogs-m)
+ 

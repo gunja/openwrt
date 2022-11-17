@@ -1,0 +1,98 @@
+{
+	"gpios": [
+		{
+			"controller_number": "3",
+			"pad_number": "1",
+			"direction": "out"
+		},
+		{
+			"controller_number": "3",
+			"pad_number": "6",
+			"direction": "out"
+		},
+		{
+			"controller_number": "3",
+			"pad_number": "16",
+			"direction": "out"
+		},
+		{
+			"controller_number": "3",
+			"pad_number": "15",
+			"direction": "out"
+		},
+		{
+			"controller_number": "4",
+			"pad_number": "20",
+			"direction": "out"
+		},
+		{
+			"controller_number": "4",
+			"pad_number": "19",
+			"direction": "out"
+		},
+		{
+			"controller_number": "3",
+			"pad_number": "22",
+			"direction": "out"
+		},
+		{
+			"controller_number": "4",
+			"pad_number": "24",
+			"direction": "out"
+		},
+		{
+			"controller_number": "5",
+			"pad_number": "1",
+			"direction": "out",
+			"default_value": "1"
+		},
+		{
+			"controller_number": "5",
+			"pad_number": "8",
+			"direction": "out",
+			"default_value": "1"
+		},
+		{
+			"controller_number": "5",
+			"pad_number": "0",
+			"direction": "out",
+			"default_value": "1"
+		},
+		{
+			"controller_number": "5",
+			"pad_number": "4",
+			"direction": "out",
+			"default_value": "1"
+		},
+		{
+			"controller_number": "5",
+			"pad_number": "3",
+			"direction": "in"
+		},
+		{
+			"controller_number": "5",
+			"pad_number": "7",
+			"direction": "in"
+		},
+		{
+			"controller_number": "4",
+			"pad_number": "0",
+			"direction": "in"
+		},
+		{
+			"controller_number": "4",
+			"pad_number": "1",
+			"direction": "in"
+		},
+		{
+			"controller_number": "4",
+			"pad_number": "3",
+			"direction": "in"
+		},
+		{
+			"controller_number": "4",
+			"pad_number": "4",
+			"direction": "in"
+		}
+	]
+}

@@ -1,0 +1,30 @@
+#!/bin/sh
+
+. /lib/functions/uci-defaults.sh
+
+board=$(board_name)
+
+board_config_update
+
+case "$board" in
+gs | lorawan_gateway_3g)
+    uci set network.wwan=interface
+    uci set network.wwan.ifname='wwan0'
+    uci set network.wwan.proto='qmi'
+    uci set network.wwan.device='/dev/cdc-wdm0'
+    uci set network.wwan.apn='internet.emt.ee'
+    uci set network.wwan.auth='none'
+    uci set network.wwan.ifname='wwan0'
+    uci set network.wwan.autoconnect='0'
+    ;;
+
+*)
+    ;;
+
+esac
+
+uci commit;
+
+board_config_flush
+
+exit 0

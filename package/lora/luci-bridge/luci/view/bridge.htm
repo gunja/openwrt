@@ -1,0 +1,31 @@
+<%+header%>
+
+<script type="text/javascript">
+//<![CDATA[
+
+window.requestAnimationFrame(function() {
+});
+
+</script>
+
+<h2 name="content"><%:Chirpstack Gateway Bridge Config Upload%>:</h2>
+
+<div class="cbi-section-node">
+<!--<h3 name="pf_upload"><%:Chirpstack Gateway Bridge config upload%></h3>-->
+<div class="table cbi-section-table">
+<div class="tr cbi-section-table-row">
+	<form id="pf_cfg_upload" method="post" action="<%=REQUEST_URI%>/upload" enctype="multipart/form-data">
+	<div class="td left">
+	<input class="cbi-button-apply" type="file" size="100" name="pf_config" accept="application/toml,.toml" />
+	</div>
+	<div class="td right">
+	<input class="btn cbi-button-save" type="submit" value="<%:Upload config%>" />
+	</div>
+	</form>
+
+</div>
+</div>
+</div>
+<br>
+
+<%+footer%>

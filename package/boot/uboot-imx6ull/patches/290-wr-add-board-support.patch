@@ -1,0 +1,44 @@
+diff -Nru u-boot-2017.07-001/arch/arm/cpu/armv7/mx6/Kconfig u-boot-2017.07-002-generic_ecspi3/arch/arm/cpu/armv7/mx6/Kconfig
+--- u-boot-2017.07-001/arch/arm/cpu/armv7/mx6/Kconfig	2020-03-28 00:59:42.813268988 +0200
++++ u-boot-2017.07-002-generic_ecspi3/arch/arm/mach-imx/mx6/Kconfig	2020-03-28 01:11:46.915001855 +0200
+@@ -252,6 +252,7 @@
+ 	select DM_THERMAL
+ 	select SUPPORT_SPL
+
++
+ config TARGET_MX6UL_14X14_EVK
+ 	select BOARD_LATE_INIT
+ 	bool "mx6ul_14x14_evk"
+@@ -285,6 +286,13 @@
+ 	select DM_THERMAL
+ 	select SUPPORT_SPL
+
++config TARGET_MX6ULL_WIRELESSROAD_ECSPI3
++	bool "Support imx6ull WirelessRoad on ecspi3"
++	select BOARD_LATE_INIT
++	depends on MX6ULL
++	select DM
++	select DM_THERMAL
++
+ config TARGET_MX6ULL_14X14_EVK
+ 	bool "Support mx6ull_14x14_evk"
+ 	select BOARD_LATE_INIT
+@@ -641,4 +649,6 @@
+ source "board/wandboard/Kconfig"
+ source "board/warp/Kconfig"
+
++source "board/freescale/wirelessroad_ecspi3/Kconfig"
++
+ endif
+--- u-boot-2020.10/arch/arm/dts/Makefile	2020-10-05 19:15:32.000000000 +0400
++++ u-boot-2020.10_fixed/arch/arm/dts/Makefile	2021-10-23 17:40:36.904582553 +0400
+@@ -730,7 +730,8 @@
+ 	imx6ull-phytec-segin-ff-rdk-emmc.dtb \
+ 	imx6ull-dart-6ul.dtb \
+ 	imx6ull-somlabs-visionsom.dtb \
+-	imx6ulz-14x14-evk.dtb
++	imx6ulz-14x14-evk.dtb \
++	wirelessroad_ecspi3.dtb
+
+ dtb-$(CONFIG_ARCH_MX6) += \
+ 	imx6-apalis.dtb \
