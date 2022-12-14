@@ -1,0 +1,21 @@
+starting work on editing ads1015.c source file
+Index: linux-5.4.168/drivers/iio/adc/ti-ads1015.c
+===================================================================
+--- linux-5.4.168.orig/drivers/iio/adc/ti-ads1015.c
++++ linux-5.4.168/drivers/iio/adc/ti-ads1015.c
+@@ -9,6 +9,15 @@
+  *	* 0x49 - ADDR connected to Vdd
+  *	* 0x4A - ADDR connected to SDA
+  *	* 0x4B - ADDR connected to SCL
++
++    here would be a patch sources eventually
++
++also see the files:
++    https://wiki.debian.org/UsingQuilt#Making_a_new_patch
++
++and can be useful:
++    https://forum.openwrt.org/t/how-to-create-and-apply-a-kernel-patch-for-openwrt-18/29840/6
++
+  */
+ 
+ #include <linux/module.h>

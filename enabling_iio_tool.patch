@@ -1,0 +1,88 @@
+--- .config.old	2022-12-14 10:35:30.031668021 +0400
++++ .config	2022-12-14 11:07:55.978248259 +0400
+@@ -4613,9 +4613,9 @@
+ # CONFIG_PACKAGE_libatasmart is not set
+ # CONFIG_PACKAGE_libaudit is not set
+ # CONFIG_PACKAGE_libauparse is not set
+-# CONFIG_PACKAGE_libavahi-client is not set
++CONFIG_PACKAGE_libavahi-client=m
+ # CONFIG_PACKAGE_libavahi-compat-libdnssd is not set
+-# CONFIG_PACKAGE_libavahi-dbus-support is not set
++CONFIG_PACKAGE_libavahi-dbus-support=m
+ # CONFIG_PACKAGE_libavahi-nodbus-support is not set
+ # CONFIG_PACKAGE_libbfd is not set
+ # CONFIG_PACKAGE_libblkid is not set
+@@ -4634,13 +4634,13 @@
+ # CONFIG_PACKAGE_libconfig is not set
+ # CONFIG_PACKAGE_libctf is not set
+ # CONFIG_PACKAGE_libcurl is not set
+-# CONFIG_PACKAGE_libdaemon is not set
++CONFIG_PACKAGE_libdaemon=m
+ # CONFIG_PACKAGE_libdaq is not set
+ # CONFIG_PACKAGE_libdaq3 is not set
+ # CONFIG_PACKAGE_libdb47 is not set
+ # CONFIG_PACKAGE_libdb47xx is not set
+ # CONFIG_PACKAGE_libdbi is not set
+-# CONFIG_PACKAGE_libdbus is not set
++CONFIG_PACKAGE_libdbus=m
+ # CONFIG_PACKAGE_libdevmapper is not set
+ # CONFIG_PACKAGE_libdevmapper-selinux is not set
+ # CONFIG_PACKAGE_libdmapsharing is not set
+@@ -4662,7 +4662,7 @@
+ # CONFIG_PACKAGE_libevent2-openssl is not set
+ # CONFIG_PACKAGE_libevent2-pthreads is not set
+ # CONFIG_PACKAGE_libexif is not set
+-# CONFIG_PACKAGE_libexpat is not set
++CONFIG_PACKAGE_libexpat=m
+ # CONFIG_PACKAGE_libexslt is not set
+ # CONFIG_PACKAGE_libext2fs is not set
+ # CONFIG_PACKAGE_libextractor is not set
+@@ -4712,7 +4712,11 @@
+ # CONFIG_PACKAGE_libid3tag is not set
+ # CONFIG_PACKAGE_libidn is not set
+ # CONFIG_PACKAGE_libidn2 is not set
+-# CONFIG_PACKAGE_libiio is not set
++CONFIG_PACKAGE_libiio=m
++CONFIG_LIBIIO_LOCAL_BACKEND=y
++CONFIG_LIBIIO_NETWORK_BACKEND=y
++# CONFIG_LIBIIO_USB_BACKEND is not set
++CONFIG_LIBIIO_XML_BACKEND=y
+ # CONFIG_PACKAGE_libinotifytools is not set
+ # CONFIG_PACKAGE_libinput is not set
+ # CONFIG_PACKAGE_libintl is not set
+@@ -4926,7 +4930,7 @@
+ # CONFIG_PACKAGE_libx264 is not set
+ # CONFIG_PACKAGE_libxerces-c is not set
+ # CONFIG_PACKAGE_libxerces-c-samples is not set
+-# CONFIG_PACKAGE_libxml2 is not set
++CONFIG_PACKAGE_libxml2=m
+ # CONFIG_PACKAGE_libxslt is not set
+ # CONFIG_PACKAGE_libyaml-cpp is not set
+ # CONFIG_PACKAGE_libyang is not set
+@@ -5596,7 +5600,7 @@
+ # CONFIG_PACKAGE_avahi-autoipd is not set
+ # CONFIG_PACKAGE_avahi-daemon-service-http is not set
+ # CONFIG_PACKAGE_avahi-daemon-service-ssh is not set
+-# CONFIG_PACKAGE_avahi-dbus-daemon is not set
++CONFIG_PACKAGE_avahi-dbus-daemon=m
+ # CONFIG_PACKAGE_avahi-dnsconfd is not set
+ # CONFIG_PACKAGE_avahi-nodbus-daemon is not set
+ # CONFIG_PACKAGE_avahi-utils is not set
+@@ -6831,7 +6835,7 @@
+ # CONFIG_PACKAGE_csstidy is not set
+ # CONFIG_PACKAGE_ct-bugcheck is not set
+ # CONFIG_PACKAGE_ctop is not set
+-# CONFIG_PACKAGE_dbus is not set
++CONFIG_PACKAGE_dbus=m
+ # CONFIG_PACKAGE_dbus-utils is not set
+ # CONFIG_PACKAGE_device-observatory is not set
+ # CONFIG_PACKAGE_dfu-util is not set
+@@ -6891,7 +6895,7 @@
+ # CONFIG_PACKAGE_hwloc-utils is not set
+ # CONFIG_PACKAGE_i2c-tools is not set
+ # CONFIG_PACKAGE_iconv is not set
+-# CONFIG_PACKAGE_iio-utils is not set
++CONFIG_PACKAGE_iio-utils=m
+ # CONFIG_PACKAGE_inotifywait is not set
+ # CONFIG_PACKAGE_inotifywatch is not set
+ # CONFIG_PACKAGE_io is not set
