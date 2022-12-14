@@ -34,9 +34,6 @@ void azt_request_parser(char* rx_buf, int rx_buf_len) {
         return;
     }
 
-    if(rx_buf[starting_symbol_idx] != AZT_RQST_STX_SYMBOL) {
-        return;
-    }
 
     // Check for ending byte idx
     int ending_symbol_idx = -1;
@@ -63,7 +60,6 @@ void azt_request_parser(char* rx_buf, int rx_buf_len) {
     if(ret == -1) {
         return;  // Broken packet. Wrong complimentary bytes
     }
-
 
     int address = azt_calculate_address(rx_buf, starting_symbol_idx);
     if(address == -1) {
@@ -240,6 +236,7 @@ static int azt_calculate_address(char* rx_buf, int address_shift_byte_idx)
             break;
         }
     }
+
     if(related_address == -1) {
         return -1;  // Wrong related address byte
     }

@@ -7,18 +7,11 @@
 #include <termios.h>
 
 #include "config.h"
-//#include "libgs.h"
 #include "libazt.h"
 #include "rk.h"
 #include "buttons.h"
 
-/*
-* Example button handler
-* Define won handlers for all keycodes from button.c
-*/
-void button_handler(int code){
-	printf("Handled button: 0x%04x (%d)\n", (int)code, (int)code);
-}
+static int delay_to_display_fw_version(rk_t* left_rk, rk_t* right_rk);
 
 int main(int argc, char* argv[])
 {
@@ -34,12 +27,17 @@ int main(int argc, char* argv[])
                  &right_rk);
 
     int azt_req_flag = 0;
-	while(1) {
+
+    while(1) {
 		buttons_handler(&left_rk, &right_rk);
         azt_req_flag = azt_rx_handler();
         if(azt_req_flag) {
             left_rk.azt_req_hndl(azt_request(), &left_rk);
             right_rk.azt_req_hndl(azt_request(), &right_rk);
+        }
+
+      	if(delay_to_display_fw_version(&left_rk, &right_rk)) {
+        	continue;
         }
 
         if(left_rk.enabled) {
@@ -61,5 +59,34 @@ int main(int argc, char* argv[])
     azt_deinit();
 
 	return 0;
+}
 
+int delay_to_display_fw_version(rk_t* left_rk, rk_t* right_rk) {
+	static int show_time_cnt = 0;
+	static int show_time_flag = 0;
+    if(show_time_flag != 2) {
+    	show_time_cnt++;
+    	if(show_time_flag == 0) {
+			if(show_time_cnt > 500) {
+				show_time_flag = 1;
+				show_time_cnt = 0;
+				if(left_rk->enabled) {
+					left_rk->can_bus.transmit(&left_rk->can_bus, 0.00, 0.00, 0.00);
+				}
+				if(right_rk->enabled) {
+					right_rk->can_bus.transmit(&right_rk->can_bus, 0.00, 0.00, 0.00);
+				}
+			}
+			return 1;
+    	} else if(show_time_flag == 1) {
+    		if(show_time_cnt > 50) {
+				printf("displaying FW version finished\r\n");
+    			show_time_flag = 2;
+    			show_time_cnt = 0;
+    		}
+    		return 1;
+    	}
+    } else {
+    	return 0;
+    }
 }

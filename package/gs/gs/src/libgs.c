@@ -347,8 +347,9 @@ static void gs_thread(gs_conninfo_t* conninfo) {
     		, conninfo->connection_lost_counter
 		, modbus_strerror(errno)
     		);
-    		gs_close(conninfo->ctx);
-    		conninfo->ctx = gs_init(conninfo);
+		modbus_flush(conninfo->ctx);
+//    		gs_close(conninfo->ctx);
+//    		conninfo->ctx = gs_init(conninfo);
 #endif
     		if(conninfo->connection_lost_counter > CONNESTION_LOST_COUNTER_VALUE) {
     			conninfo->connection_lost_flag = -1;

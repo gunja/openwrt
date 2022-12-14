@@ -111,7 +111,7 @@ function get_show_data(){
          XHR.get('/cgi-bin/luci/admin/gs/firmware_version_get', { token: '<%=token%>' }, function(xhr, resp) {
                  let title = document.getElementById("fw_ver")
                  console.log("resp: ", resp)
-                 title.innerText = "Версия прошивки: " + resp.version
+                 title.innerText = "Версия прошивки: " + resp.version + " : " + resp.subversion
          });
 }
 

@@ -51,6 +51,8 @@
 #define AZT_REQUEST_WRITE_PARAMS                    0x4F
 #define AZT_REQUEST_CURRENT_DOSE_READING            0x58
 
+#define AZT_M2M_TELECOM_GET_GAS_DENSITY				0x5C
+#define AZT_M2M_TELECOM_SET_GAS_DENSITY				0x5E
 
 #define AZT_PARAM_TRK_MODE                  0x32  // 0x31 - left, 0x32 - right, 0x33 - special
 #define AZT_PARAM_TRK_MODE_VAL_NULL         0x30

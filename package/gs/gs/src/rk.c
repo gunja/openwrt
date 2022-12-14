@@ -12,7 +12,7 @@ static int rk_is_not_fault();
 static int rk_process(rk_t* self);
 static int rk_stop(rk_t* self);
 static int rk_fueling_scheduler(rk_t* self);
-static void int_to_string_azt(int val, char* res, int* cnt);
+static void int_to_string_azt(int val, char* res, int* cnt, int len);
 static void rk_indicate_error_message(rk_t* self);
 static int rk_check_state(rk_t* self);
 static void button_start_callback(rk_t* self, int code);
@@ -75,8 +75,8 @@ int rk_init(int idx, rk_t* rk) {
     }
 
     CAN_init(idx, &rk->can_bus);
-    rk->can_bus.transmit_half(&rk->can_bus, FIRMWARE_VERSION, DEVICE_MARKING_CODE);
-//    rk->can_bus.transmit(&rk->can_bus, 0.00, 0.00, 0.00);
+    rk->can_bus.transmit(&rk->can_bus, FIRMWARE_VERSION, FIRMWARE_SUBVERSION, DEVICE_MARKING_CODE);
+
     error_init(&rk->error_state);
 
     // address
@@ -188,13 +188,6 @@ int rk_init(int idx, rk_t* rk) {
     rk->fueling_price_per_liter = tmp;
 
     ret = in_4_20_ma_init(idx, &rk->in_4_20);
-    if(ret == -1) {
-#ifndef DEV_WITHOUT_4_20
-        printf("ERROR. %s RK. Input 4-20ma not connected\r\n", rk->side == left ? "Left" : "Right");
-        error_set(&rk->error_state, ERROR_INPUT_4_20_NOT_CONNECTED);
-        rk_indicate_error_message(rk);
-#endif
-    }
 
     rk->fueling_process_flag = 0;
     led_init(idx, &rk->led, &rk->error_state.code, &rk->fueling_process_flag);
@@ -227,7 +220,7 @@ static int rk_check_state(rk_t* self) {
 
     if( (ret == IN_4_20_NOT_CONNECTED_ERROR) && error_is_clear(&self->error_state, ERROR_INPUT_4_20_NOT_CONNECTED) )
     {
-    	printf("4-20ma disconnected ERROR. state %d\r\n", ret);
+    	printf("ERROR %s RK. 4-20ma disconnected ERROR. state %d\r\n", self->side == left ? "Left" : "Right", ret);
         error_set(&self->error_state, ERROR_INPUT_4_20_NOT_CONNECTED);
         error_clear(&self->error_state, ERROR_INPUT_4_20_LOW_PRESSURE);
         error_clear(&self->error_state, ERROR_INPUT_4_20_HIGH_PRESSURE);
@@ -235,14 +228,14 @@ static int rk_check_state(rk_t* self) {
     }
     else if( (ret != IN_4_20_NOT_CONNECTED_ERROR) && error_is_set(&self->error_state, ERROR_INPUT_4_20_NOT_CONNECTED))
     {
-    	printf("4-20ma connection restored. state %d\r\n", ret);
+    	printf("ERROR %s RK. 4-20ma connection restored. state %d\r\n", self->side == left ? "Left" : "Right", ret);
         error_clear(&self->error_state, ERROR_INPUT_4_20_NOT_CONNECTED);
         rk_indicate_error_message(self);
     }
 
     if( (ret == IN_4_20_LOW_PRESSURE_ERROR) && error_is_clear(&self->error_state, ERROR_INPUT_4_20_LOW_PRESSURE) )
     {
-    	printf("4-20ma low pressure ERROR. state %d\r\n", ret);
+    	printf("ERROR %s RK. 4-20ma low pressure ERROR. state %d\r\n", self->side == left ? "Left" : "Right", ret);
         error_clear(&self->error_state, ERROR_INPUT_4_20_NOT_CONNECTED);
         error_set(&self->error_state, ERROR_INPUT_4_20_LOW_PRESSURE);
         error_clear(&self->error_state, ERROR_INPUT_4_20_HIGH_PRESSURE);
@@ -250,14 +243,14 @@ static int rk_check_state(rk_t* self) {
     }
     else if( (ret != IN_4_20_LOW_PRESSURE_ERROR) && error_is_set(&self->error_state, ERROR_INPUT_4_20_LOW_PRESSURE))
     {
-    	printf("4-20ma low pressure error restored. state %d\r\n", ret);
+    	printf("ERROR %s RK. 4-20ma low pressure error restored. state %d\r\n", self->side == left ? "Left" : "Right", ret);
         error_clear(&self->error_state, ERROR_INPUT_4_20_LOW_PRESSURE);
         rk_indicate_error_message(self);
     }
 
     if( (ret == IN_4_20_HIGH_PRESSURE_ERROR) && error_is_clear(&self->error_state, ERROR_INPUT_4_20_HIGH_PRESSURE) )
     {
-    	printf("4-20ma high pressure ERROR. state %d\r\n", ret);
+    	printf("ERROR %s RK. 4-20ma high pressure ERROR. state %d\r\n", self->side == left ? "Left" : "Right", ret);
         error_clear(&self->error_state, ERROR_INPUT_4_20_NOT_CONNECTED);
         error_clear(&self->error_state, ERROR_INPUT_4_20_LOW_PRESSURE);
         error_set(&self->error_state, ERROR_INPUT_4_20_HIGH_PRESSURE);
@@ -265,7 +258,7 @@ static int rk_check_state(rk_t* self) {
     }
     else if( (ret != IN_4_20_HIGH_PRESSURE_ERROR) && error_is_set(&self->error_state, ERROR_INPUT_4_20_HIGH_PRESSURE))
     {
-    	printf("4-20ma high pressure error restored. state %d\r\n", ret);
+    	printf("ERROR %s RK. 4-20ma high pressure error restored. state %d\r\n", self->side == left ? "Left" : "Right", ret);
         error_clear(&self->error_state, ERROR_INPUT_4_20_HIGH_PRESSURE);
         rk_indicate_error_message(self);
     }
@@ -650,12 +643,20 @@ static int azt_req_handler(azt_request_t* req, rk_t* self)
             cnt = 0;
             memset(responce, 0, sizeof(responce));
             tmp = (int)roundf(self->summator_volume * 100.0);
-            int_to_string_azt(tmp, responce, &cnt);
+            int_to_string_azt(tmp, responce, &cnt, 10);
             tmp = (int)roundf(self->summator_price * 100.0);
-            int_to_string_azt(tmp, responce, &cnt);
+            int_to_string_azt(tmp, responce, &cnt, 10);
             azt_tx(responce, cnt);
             printf("%s RK. Address %d. AZT_REQUEST_SUMMATORS_VALUE %.2f\r\n", self->side == left ? "Left" : "Right", self->address, self->summator_volume);
 //            printf("%s RK. summator_volume: %.2f. summator_price: %.2f\r\n", self->side == left ? "Left" : "Right", self->summator_volume, self->summator_price);
+            break;
+        case AZT_M2M_TELECOM_GET_GAS_DENSITY:
+            cnt = 0;
+            memset(responce, 0, sizeof(responce));
+            tmp = (int)roundf(self->gas_density * 1000.0);
+            int_to_string_azt(tmp, responce, &cnt, 4);
+            azt_tx(responce, cnt);
+            printf("%s RK. Address %d. AZT_REQUEST_GAS_DENSITY %.3f\r\n", self->side == left ? "Left" : "Right", self->address, self->gas_density);
             break;
         case AZT_REQUEST_TRK_TYPE:
 //            printf("%s RK. Address %d. AZT_REQUEST_TRK_TYPE\n", self->side == left ? "Left" : "Right", self->address);
@@ -718,13 +719,29 @@ static int azt_req_handler(azt_request_t* req, rk_t* self)
             price[4] = req->params[3];
             float fueling_price_per_liter = strtof(price, NULL);
             self->fueling_price_per_liter = fueling_price_per_liter;
-            tmp = set_config(self->config_filename_price_per_liter, price, strlen(price));
+//            tmp = set_config(self->config_filename_price_per_liter, price, strlen(price));
             if(tmp == 0) {
                 azt_tx_ack();
             } else {
                 azt_tx_can();
             }
 
+        case AZT_M2M_TELECOM_SET_GAS_DENSITY:
+            printf("%s RK. Address %d. AZT_M2M_TELECOM_REQUEST_GAS_DENSITY\n", self->side == left ? "Left" : "Right", self->address);
+            char density[6] = {0};
+            density[0] = req->params[0];
+            density[1] = '.';
+            density[2] = req->params[1];
+            density[3] = req->params[2];
+            density[4] = req->params[3];
+            float gas_density = strtof(density, NULL);
+            self->gas_density = gas_density;
+            tmp = set_config(self->config_filename_gas_density, density, strlen(density));
+            if(tmp == 0) {
+                azt_tx_ack();
+            } else {
+                azt_tx_can();
+            }
             break;
         case AZT_REQUEST_VALVE_DISABLING_THRESHOLD_SETUP:
             printf("%s RK. Address %d. AZT_REQUEST_VALVE_DISABLING_THRESHOLD_SETUP\n", self->side == left ? "Left" : "Right", self->address);
@@ -909,9 +926,15 @@ static void button_stop_callback(rk_t* self, int code)
     }
 }
 
-static void int_to_string_azt(int val, char* res, int* cnt) {
-    int div = 1000000000;
-    for(int i=0; i<10; i++) {
+static void int_to_string_azt(int val, char* res, int* cnt, int len) {
+    int div = 0;
+    switch(len) {
+		case 4: div = 1000; break;
+		case 10: div = 1000000000; break;
+		default: div = 1000000000; break;
+    }
+
+    for(int i=0; i<len; i++) {
         res[*cnt] = val / div + ASCII_ZERO;
 //        printf("%d / %d -> %c. cnt: %d\n", val, div, res[*cnt], *cnt);
         if(res[*cnt] > ASCII_ZERO) {

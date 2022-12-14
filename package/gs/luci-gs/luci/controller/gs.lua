@@ -1,7 +1,7 @@
--- scp package/gs/luci-gs/luci/controller/gs.lua root@192.168.31.46:/usr/lib/lua/luci/controller/gs.lua
--- scp package/gs/luci-gs/luci/view/gs.htm root@192.168.31.46:/usr/lib/lua/luci/view/gs.htm
--- scp package/gs/luci-gs/styles/gs.css root@192.168.31.46:/www/luci-static/resources/gs.css
--- scp package/gs/gs/files/gpio_conf.json root@192.168.31.46:/etc/gpio_conf.json
+-- scp package/gs/luci-gs/luci/controller/gs.lua root@192.168.31.22:/usr/lib/lua/luci/controller/gs.lua
+-- scp package/gs/luci-gs/luci/view/gs.htm root@192.168.31.22:/usr/lib/lua/luci/view/gs.htm
+-- scp package/gs/luci-gs/styles/gs.css root@192.168.31.22:/www/luci-static/resources/gs.css
+-- scp package/gs/gs/files/gpio_conf.json root@192.168.31.22:/etc/gpio_conf.json
 
 module("luci.controller.gs", package.seeall)
 
@@ -25,9 +25,11 @@ function gs_firmware_version_get()
 	local cfg, json_cfg
 	local result = {}
 	fw_ver = nixio.fs.readfile("/mnt/gs/1/firmware_version"):sub(1,-2)
+	fw_sub_ver = nixio.fs.readfile("/mnt/gs/1/firmware_subversion"):sub(1,-2)
 
 	result = {
 	        version = fw_ver,
+	        subversion = fw_sub_ver,
 	    },
 
 	luci.http.prepare_content("application/json")
