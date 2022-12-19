@@ -11,7 +11,7 @@ define Package/gs
   SECTION:=examples
   CATEGORY:=Examples
   TITLE:=gs control application
-  DEPENDS:=+libmodbus
+  DEPENDS:=+libmodbus +libgpiod
 endef
 
 define Package/gs/description

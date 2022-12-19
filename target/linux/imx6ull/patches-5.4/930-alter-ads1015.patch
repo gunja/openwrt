@@ -3,7 +3,7 @@ Index: linux-5.4.168/drivers/iio/adc/ti-ads1015.c
 ===================================================================
 --- linux-5.4.168.orig/drivers/iio/adc/ti-ads1015.c
 +++ linux-5.4.168/drivers/iio/adc/ti-ads1015.c
-@@ -9,6 +9,15 @@
+@@ -9,6 +9,28 @@
   *	* 0x49 - ADDR connected to Vdd
   *	* 0x4A - ADDR connected to SDA
   *	* 0x4B - ADDR connected to SCL
@@ -16,6 +16,68 @@ Index: linux-5.4.168/drivers/iio/adc/ti-ads1015.c
 +and can be useful:
 +    https://forum.openwrt.org/t/how-to-create-and-apply-a-kernel-patch-for-openwrt-18/29840/6
 +
++here is partial sequence I used to reach this point
++ 2016  git checkout imx6ull-2021-cand
++ 2017  git pull
++ 2018  git log --oneline
++ 2019  git diff --stat HEAD~1
++ 2020  cat target/linux/imx6ull/patches-5.4/930-alter-ads1015.patch
++ 2021  make target/linux/{clean,prepare} V=s QUILT=1
++ 2022  cd build_dir/target-arm_cortex-a7+neon-vfpv4_musl_eabi/linux-imx6ull_cortexa7/linux-5.4.168/
++ 2023  quilt series
++ 2024  quilt push platform/930-alter-ads1015.patch
++ 2025  quilt edit drivers/iio/adc/ti-ads1015.c
++
++
   */
  
  #include <linux/module.h>
+@@ -793,6 +815,13 @@ static int ads1015_buffer_postdisable(st
+ 	return ads1015_set_power_state(iio_priv(indio_dev), false);
+ }
+ 
++bool ads1115_validate_scan_mask(struct iio_dev *indio_dev, const unsigned long *mask)
++{
++    //just for debug purposes. always return true
++    //TODO fixme!
++    return true;
++}
++
+ static const struct iio_buffer_setup_ops ads1015_buffer_setup_ops = {
+ 	.preenable	= ads1015_buffer_preenable,
+ 	.postenable	= iio_triggered_buffer_postenable,
+@@ -801,6 +830,15 @@ static const struct iio_buffer_setup_ops
+ 	.validate_scan_mask = &iio_validate_scan_mask_onehot,
+ };
+ 
++static const struct iio_buffer_setup_ops ads1115_buffer_setup_ops = {
++	.preenable	= ads1015_buffer_preenable,
++	.postenable	= iio_triggered_buffer_postenable,
++	.predisable	= iio_triggered_buffer_predisable,
++	.postdisable	= ads1015_buffer_postdisable,
++	.validate_scan_mask = &ads1115_validate_scan_mask,
++};
++
++
+ static IIO_CONST_ATTR_NAMED(ads1015_scale_available, scale_available,
+ 	"3 2 1 0.5 0.25 0.125");
+ static IIO_CONST_ATTR_NAMED(ads1115_scale_available, scale_available,
+@@ -1007,9 +1045,17 @@ static int ads1015_probe(struct i2c_clie
+ 		return PTR_ERR(data->regmap);
+ 	}
+ 
+-	ret = devm_iio_triggered_buffer_setup(&client->dev, indio_dev, NULL,
++    switch(chip)
++    {
++        case ADS1015:
++	        ret = devm_iio_triggered_buffer_setup(&client->dev, indio_dev, NULL,
+ 					      ads1015_trigger_handler,
+ 					      &ads1015_buffer_setup_ops);
++        case ADS1115:
++	        ret = devm_iio_triggered_buffer_setup(&client->dev, indio_dev, NULL,
++					      ads1015_trigger_handler,
++                            &ads1115_buffer_setup_ops);
++    }
+ 	if (ret < 0) {
+ 		dev_err(&client->dev, "iio triggered buffer setup failed\n");
+ 		return ret;
