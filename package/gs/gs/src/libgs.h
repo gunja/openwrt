@@ -45,6 +45,16 @@ typedef struct measurements {
     float volume_inventory;
 } measurements_t;
 
+/* either structure is overfilled, or not properly named
+
+connection info should (can?) contain fields:
+    port, baudrate, ctx, maybe mask which is used to generate device filename from port number and that mask;
+     plus, for management simplicity: modbus_t pointer
+
+ALL other fields have no relation to CONNECTION, to whatever, not to connection itself
+either use structure as a part of structure, or as a pointer to other object (choice depends on use cases)
+
+*/
 typedef struct gs_conninfo {
     uint8_t port;
     uint32_t baudrate;
@@ -70,6 +80,9 @@ int gs_scan(gs_conninfo_t *conninfo);
 void gs_close(modbus_t *ctx);
 int gs_check_state(gs_conninfo_t* conninfo);
 
+/* read/write helper functions*/
+int gs_write_reg(modbus_t *ctx, int reg, int count, uint16_t *buffer);
+int gs_read_reg(modbus_t *ctx, int reg, int count, uint16_t *buffer);
 
 /*common functions */
 int gs_get_version(modbus_t *ctx);

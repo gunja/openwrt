@@ -1,5 +1,5 @@
 TGTS= gs test_modbus test_modbus2 test_can
-TGTS += massmeter_setup_utility
+TGTS += mmsu
 
 
 CC = gcc
@@ -30,7 +30,7 @@ test_modbus2: $(OBJ)
 test_can: test_can.o can.o settings.o
 	$(CC) -o  $@ $? $(CFLAGS) $(LDFLAGS)
 
-massmeter_setup_utility: mm_su.o
+mmsu: mm_su.o libgs.o settings.o
 	$(CC) -o $@ $? $(CFLAGS) $(LDFLAGS)
 
 

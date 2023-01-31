@@ -5,7 +5,7 @@
 
 static void gs_thread(gs_conninfo_t* conninfo);
 
-static int gs_read_reg(modbus_t *ctx, int reg, int count, uint16_t *buffer)
+int gs_read_reg(modbus_t *ctx, int reg, int count, uint16_t *buffer)
 {
     int ret;
     usleep(MODBUG_DELAY_US);
@@ -16,7 +16,7 @@ static int gs_read_reg(modbus_t *ctx, int reg, int count, uint16_t *buffer)
     return ret;
 }
 
-static int gs_write_reg(modbus_t *ctx, int reg, int count, uint16_t *buffer)
+int gs_write_reg(modbus_t *ctx, int reg, int count, uint16_t *buffer)
 {
     int ret;
     usleep(MODBUG_DELAY_US);
@@ -73,6 +73,8 @@ int gs_set_modbus_baudrate(gs_conninfo_t* conninfo, Flomac_Baudrate_t baudrate_)
     }
 
     printf("Baudrate changing step 3. reinit %d\r\n", conninfo->baudrate);
+    // FIXME if ctx was already allocated, who cleared previous
+    // allocation?
     conninfo->ctx = gs_init(conninfo);
 
     if(device_mode == Mode_MMI) {
