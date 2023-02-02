@@ -149,6 +149,15 @@ documentation, these addresses stores INTEGER values */
 /*  block 5 TBD */
 /*  block 6 TBD */
 /* base functions block 7 TBD */
+#define REG_RW_I_ASS_LOW_FLOW_CUTOFF 421
+#define REG_RW_I_ASS_LOW_FLOW_UNIT 422
+#define REG_RW_F_DENSITY_CUTOFF 446
+#define REG_RW_I_SLUG_FLOW_ENABLE 452
+#define REG_RW_F_SLUG_FLOW_BREAK_TIME 453
+#define REG_RW_F_SLUG_FLOW_LO_LIMIT 457
+#define REG_RW_F_SLUG_FLOW_HI_LIMIT 455
+#define REG_RW_I_FIX_PRESSURE_UNIT 468
+#define REG_RW_F_FIX_PRESSURE_INPUT 440
 
 /* Concentration  block 8  TBD*/
 

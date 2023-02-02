@@ -164,13 +164,70 @@ int main(int argc, char * const argv[])
         struct _configuration_prop SETTINGS[]=
         {
             // TODO reserve placeholders to alter in case of direct/inverse settings
-            { Mode_Flomac, 1, REG_RW_I_CONTRAST, 30 }
+            { Mode_Flomac, 1, REG_RW_I_SUM_MODE1, 1 }
+            ,{ Mode_Flomac, 1, REG_RW_I_SUM_MODE2, 1 }
+            ,{ Mode_Flomac, 1, REG_RW_I_SUM_MODE3, 1 }
+            , { Mode_Flomac, 1, REG_RW_I_SUM_MODE4, 1 }
+            , { Mode_Flomac, 1, REG_RW_I_UNIT_MASS_FLOW, 3 }
+            , { Mode_MMI, 0, R_MMI_MASSFLOW_U, 73 }
+            , { Mode_Flomac, 1, REG_RW_I_UNIT_VOLUME_FLOW, 6 }
+            , { Mode_MMI, 0, R_MMI_VOLFLOW_U, 24 }
+            // there's no MMI registers for SUM
+            , { Mode_Flomac, 1, REG_RW_I_SUM_FAILSAFE_MODE, 2 }
+            , { Mode_Flomac, 1, REG_RW_I_SUM_STATE1, 0}
+            , { Mode_Flomac, 1, REG_RW_I_SUM_STATE2, 0}
+            , { Mode_Flomac, 1, REG_RW_I_SUM_STATE3, 0}
+            , { Mode_Flomac, 1, REG_RW_I_SUM_STATE4, 0}
+            , { Mode_Flomac, 1, REG_RW_I_SUM_UNIT3, 1}
+            , { Mode_MMI, 0, R_MMI_MASS_U, MASS_UNIT_KG}
+            , { Mode_Flomac, 0, REG_RW_I_SUM_RESET3, 1}
+            , { Mode_Flomac, 1, REG_RW_I_SUM_ASSIGN4, 2}
+            , { Mode_Flomac, 1, REG_RW_I_SUM_UNIT4, 1}
+            , { Mode_MMI, 0, R_MMI_VOLUME_U, 41}
+            , { Mode_Flomac, 0, REG_RW_I_SUM_RESET4, 1}
+            // NOTE in example it's set to 2, from image should be 1
+            , { Mode_Flomac, 1, REG_RW_I_ASS_LOW_FLOW_CUTOFF, 1}
+            , { Mode_Flomac, 1, REG_RW_I_ASS_LOW_FLOW_UNIT, 3}
+            //already set earlier  , { Mode_MMI, 0, R_MMI_MASSFLOW_U, 73 }
+            , { Mode_Flomac, 1, REG_RW_F_DENSITY_CUTOFF, 0xCCCD}
+            , { Mode_Flomac, 1, REG_RW_F_DENSITY_CUTOFF + 1, 0x3E4C}
+            , { Mode_MMI, 0, REG_MMI_RW_F_CUTOFF_FOR_DENSITY, 0xCCCD}
+            , { Mode_MMI, 0, REG_MMI_RW_F_CUTOFF_FOR_DENSITY + 1, 0x3E4C}
+            , { Mode_Flomac, 1, REG_RW_I_SLUG_FLOW_ENABLE, 1}
+            , { Mode_Flomac, 1, REG_RW_F_SLUG_FLOW_BREAK_TIME, 0}
+            , { Mode_Flomac, 1, REG_RW_F_SLUG_FLOW_BREAK_TIME + 1, 0}
+            , { Mode_MMI, 0, REG_MMI_RW_F_SLUG_FLOW_DURATION, 0}
+            , { Mode_MMI, 0, REG_MMI_RW_F_SLUG_FLOW_DURATION + 1, 0}
+            , { Mode_Flomac, 1, REG_RW_F_SLUG_FLOW_LO_LIMIT, 0}
+            , { Mode_Flomac, 1, REG_RW_F_SLUG_FLOW_LO_LIMIT + 1, 0}
+            , { Mode_MMI, 0, REG_MMI_RW_F_SLUG_FLOW_LOW_LIMIT, 0}
+            , { Mode_MMI, 0, REG_MMI_RW_F_SLUG_FLOW_LOW_LIMIT + 1, 0}
+            , { Mode_Flomac, 1, REG_RW_F_SLUG_FLOW_HI_LIMIT, 0}
+            , { Mode_Flomac, 1, REG_RW_F_SLUG_FLOW_HI_LIMIT + 1, 0x40A0}
+            , { Mode_MMI, 0, REG_MMI_RW_F_SLUG_FLOW_HIGH_LIMIT, 0}
+            , { Mode_MMI, 0, REG_MMI_RW_F_SLUG_FLOW_HIGH_LIMIT + 1, 0x40A0}
+            , { Mode_Flomac, 1, REG_RW_I_FIX_PRESSURE_UNIT, 1}
+            , { Mode_MMI, 0, R_MMI_PRESSURE_U, 7}
+            , { Mode_Flomac, 1, REG_RW_F_FIX_PRESSURE_INPUT, 0x6128}
+            , { Mode_Flomac, 1, REG_RW_F_FIX_PRESSURE_INPUT + 1, 0x4004}
+            , { Mode_MMI, 0, REG_MMI_RW_F_EXTERNAL_PRESSURE_VALUE, 0x6128}
+            , { Mode_MMI, 0, REG_MMI_RW_F_EXTERNAL_PRESSURE_VALUE+1, 0x4004}
+            , { Mode_Flomac, 1, REG_RW_I_UNIT_PRESSURE, 1}
+            // already set , { Mode_MMI, 0, R_MMI_PRESSURE_U, 7}
         };
         if ( is_straight)
         {
             // TODO replace placeholders in SETTINGS to match for straight
+            SETTINGS[0].value = 1;
+            SETTINGS[1].value = 1;
+            SETTINGS[2].value = 1;
+            SETTINGS[3].value = 1;
         } else {
             // TODO replace placeholders in SETTINGS to match for reversed
+            SETTINGS[0].value = 2;
+            SETTINGS[1].value = 2;
+            SETTINGS[2].value = 2;
+            SETTINGS[3].value = 2;
         }
 
         int i;
