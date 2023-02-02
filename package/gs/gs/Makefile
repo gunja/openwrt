@@ -37,6 +37,7 @@ define Package/gs/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/test_modbus2 $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/test_can $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/mmsu $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/dump_regs $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/etc
 	$(INSTALL_DATA) ./files/gpio_conf.json $(1)/etc/gpio_conf.json
 	$(INSTALL_DIR) $(1)/etc/gs

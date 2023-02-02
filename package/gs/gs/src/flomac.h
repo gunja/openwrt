@@ -41,6 +41,9 @@ typedef enum {
 #define REG_F_SUM4 857
 
 /* MODBUS Config registres */
+/*FIXME such notation is misleading: from _F_ it's expected
+FLOAT data type, like values above, but according to
+documentation, these addresses stores INTEGER values */
 #define REG_F_DEVADDR 430
 #define REG_F_BAUDRATE 431
 #define REG_F_PARITY 432

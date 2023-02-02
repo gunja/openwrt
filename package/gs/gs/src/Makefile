@@ -1,5 +1,6 @@
 TGTS= gs test_modbus test_modbus2 test_can
 TGTS += mmsu
+TGTS += dump_regs
 
 
 CC = gcc
@@ -31,6 +32,9 @@ test_can: test_can.o can.o settings.o
 	$(CC) -o  $@ $? $(CFLAGS) $(LDFLAGS)
 
 mmsu: mm_su.o libgs.o settings.o
+	$(CC) -o $@ $? $(CFLAGS) $(LDFLAGS)
+
+dump_regs:  dump_regs.o libgs.o settings.o
 	$(CC) -o $@ $? $(CFLAGS) $(LDFLAGS)
 
 

@@ -46,7 +46,6 @@ int print_help()
 int main(int argc, char* argv[])
 {
     int ret;
-	modbus_t *ctx;
     int max_addr = DEFAULT_MAX_SCAN_ADDR, a_cand;
     int baud = DEFAULT_BAUD_RATE, b_cand;
 
