@@ -33,7 +33,7 @@ static void valve_all_off(rk_t* self);
 
 //static int valves_amount = 1;  // To-Do: implement config file and web interface
 
-char tmp[RX_BUF_SIZE] = {0};
+//char tmp[RX_BUF_SIZE] = {0};
 
 int rk_init(int idx, rk_t* rk) {
     char filename[FILENAME_MAX_SIZE];

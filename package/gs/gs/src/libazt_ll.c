@@ -66,8 +66,8 @@ int azt_port_init(void (*f)(char* rx_buf, int rx_buf_len)) {
         return 1;
     }
 
-    memset(&read_buf, 0, sizeof(read_buf));
-    memset(&packet_buf, 0, sizeof(packet_buf));
+    memset(read_buf, 0, sizeof(read_buf));
+    memset(packet_buf, 0, sizeof(packet_buf));
 }
 
 int azt_port_read(void) {

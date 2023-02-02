@@ -92,9 +92,10 @@ int main(int argc, char * const argv[])
     if(perform_flomac_dump(ctx) < 0)
     {
         fprintf(stderr, "Some error occured while dumping flomac registers.\nExiting\n");
-        modbus_close(ctx);
+        /*modbus_close(ctx);
         modbus_free(ctx);
         exit(EXIT_FAILURE);
+        */
     }
 
     printf("RAW consequent dump\n");
@@ -103,13 +104,14 @@ int main(int argc, char * const argv[])
     if(perform_mmi_dump(ctx) < 0)
     {
         fprintf(stderr, "Some error occured while dumping mmi registers.\nExiting\n");
-        modbus_close(ctx);
+        /*modbus_close(ctx);
         modbus_free(ctx);
-        exit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);*/
     }
     printf("RAW consequent dump\n");
     rude_raw_dump(ctx, C_MMI_ENABLE_PCOMP, MMI_MAX_USED_REG); 
 
+device_mode = Mode_MMI;
     gs_write_reg(ctx, R_MMI_MBUS_MAP, 1, &device_mode);
     //to force some delay before following closing methods
     gs_read_reg(ctx, R_MMI_MBUS_MAP, 1, &device_mode);
@@ -143,58 +145,59 @@ int perform_flomac_dump(modbus_t *ctx)
     if( dump_region(ctx, REG_F_DRIVEGAIN, 2)  < 0)
     {
         fprintf(stderr, "Failed to read Drive Gain\n");
-        return -3;
+        //return -3;
     }
     printf("# Reading REG_F_SUM1 at %d\n",REG_F_SUM1 );
     if( dump_region(ctx, REG_F_SUM1, 2)  < 0)
     {
         fprintf(stderr, "Failed to read Summator 1 \n");
-        return -4;
+        //return -4;
     }
     printf("# Reading REG_F_SUM2 at %d\n", REG_F_SUM2 );
     if( dump_region(ctx, REG_F_SUM2, 2)  < 0)
     {
         fprintf(stderr, "Failed to read Summator 2 \n");
-        return -5;
+        //return -5;
     }
     printf("# Reading REG_F_SUM3 at %d\n", REG_F_SUM3 );
     if( dump_region(ctx, REG_F_SUM3, 2)  < 0)
     {
         fprintf(stderr, "Failed to read Summator 3 \n");
-        return -6;
+        //return -6;
     }
     printf("# Reading REG_F_SUM4 at %d\n", REG_F_SUM4 );
     if( dump_region(ctx, REG_F_SUM4, 2)  < 0)
     {
         fprintf(stderr, "Failed to read Summator 4 \n");
-        return -5;
+        //return -5;
     }
     printf("# Reading configs starting REG_F_DEVADDR at %d\n", REG_F_DEVADDR);
     if( dump_region(ctx, REG_F_DEVADDR, 4)  < 0)
     {
         fprintf(stderr, "Failed to read 4 starting REG_F_DEVADDR \n");
-        return -6;
+        //return -6;
     }
     printf("# Reading configs starting REG_F_MBUS_MODE at %d\n", REG_F_MBUS_MODE);
     if( dump_region(ctx, REG_F_MBUS_MODE, 1)  < 0)
     {
         fprintf(stderr, "Failed to read REG_F_MBUS_MODE \n");
-        return -7;
+        //return -7;
     }
     printf("# Reading configs starting REG_F_FLOAT_BYTEORDER at %d\n", REG_F_FLOAT_BYTEORDER);
     if( dump_region(ctx, REG_F_FLOAT_BYTEORDER, 1)  < 0)
     {
         fprintf(stderr, "Failed to read REG_F_FLOAT_BYTEORDER \n");
-        return -8;
+        //return -8;
     }
     printf("# Reading configs starting REG_F_HWVER at %d\n", REG_F_HWVER);
     if( dump_region(ctx, REG_F_HWVER, 6)  < 0)
     {
         fprintf(stderr, "Failed to read REG_F_HWVER \n");
-        return -8;
+        //return -8;
     }
     
     // TODO dump remaining registers
+    return 9;
 }
 
 int perform_mmi_dump(modbus_t *ctx)
