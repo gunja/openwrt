@@ -20,9 +20,18 @@
 #include <modbus/modbus.h>
 #include <modbus/modbus-rtu.h>
 #include <errno.h>
+#include <string.h>
 
-#include "flomac.h"
-#include "mmi.h"
+#include "libgs.h"
+
+
+struct _configuration_prop
+{
+    Flomac_Mode_t attribution;
+    uint8_t isCoil;
+    uint16_t address;
+    uint16_t value;
+};
 
 #define DEFAULT_MODBUS_PATH "/dev/ttymxc4"
 #define DEFAULT_DEVICE_ADDR 1
@@ -33,18 +42,19 @@ int g_verbosity = 100;
 #define DEGUB_VERB 10
 
 int open_connect_modbus(modbus_t **, const char *, int);
+int settingsSortDesc(const void *, const void *);
 
 int print_help(const char *name)
 {
     printf("Calling conversion: %s [-d device_file] [-a address] {[-s]|-r}\n", name);
     printf("where:  -d device_file\t\tselects which file will be opened for communucation with device. Default is %s\n", DEFAULT_MODBUS_PATH);
-    printf("where:  -a address\t\tsets which address of slave device will be used. Default is %s. Note!!! none boundaries are checked. On responsibility of a caller\n", DEFAULT_DEVICE_ADDR);
+    printf("where:  -a address\t\tsets which address of slave device will be used. Default is %d. Note!!! none boundaries are checked. On responsibility of a caller\n", DEFAULT_DEVICE_ADDR);
     printf("        -s            \t\tselects straight connection. This is default and can be ommitted\n");
     printf("        -r            \t\tselects reversed connection\n");
     return 0;
 }
 
-int main(int argc, const char * argv[])
+int main(int argc, char * const argv[])
 {
     char * device_to_open= NULL;
     int is_straight = 1;
@@ -150,21 +160,60 @@ int main(int argc, const char * argv[])
             modbus_set_slave(ctx, address);
             need_speed_change = 0;
         }
+
+        struct _configuration_prop SETTINGS[]=
+        {
+            // TODO reserve placeholders to alter in case of direct/inverse settings
+            { Mode_Flomac, 1, REG_RW_I_CONTRAST, 30 }
+        };
+        if ( is_straight)
+        {
+            // TODO replace placeholders in SETTINGS to match for straight
+        } else {
+            // TODO replace placeholders in SETTINGS to match for reversed
+        }
+
+        int i;
+        int settings_size= sizeof(SETTINGS)/sizeof(struct _configuration_prop);
+
         // 0.  records in "settings table": sort by attribution: Flomac settings go first
+        qsort(SETTINGS, settings_size,
+            sizeof(struct _configuration_prop), settingsSortDesc);
         // for each record in "settings table" with Flomac attribution
         //      apply setting
+        for(i=0; i < settings_size &&
+            SETTINGS[i].attribution == Mode_Flomac; ++i)
+        {
+            printf("Flomac setting %d to %04X -> ", SETTINGS[i].address,
+                    SETTINGS[i].value);
+            ret = gs_write_reg(ctx, SETTINGS[i].address, 1,
+                &SETTINGS[i].value);
+            printf("%d\n", ret);
+        }
         // switch mapping to MMI
+        uint16_t mmi_mode = Mode_MMI;
+        ret = gs_write_reg(ctx, REG_F_MBUS_MODE, 1, &mmi_mode);
         //  for each record in "settings table" with MMI attribution:
         //      apply setting
-
+        for(; i < settings_size && SETTINGS[i].attribution == Mode_MMI
+            && SETTINGS[i].isCoil != 0; ++i)
+        {
+            printf("MMI coils setting %d to %s->", SETTINGS[i].address,
+                SETTINGS[i].value?"TRUE": "FALSE");
+            ret=modbus_write_bit(ctx, SETTINGS[i].address, SETTINGS[i].value);
+            printf("%d\n", ret);
+        }
+        for(; i < settings_size && SETTINGS[i].attribution == Mode_MMI; ++i)
+        {
+            printf("MMI register setting %d to %04X->", SETTINGS[i].address,
+                SETTINGS[i].value);
+            ret=modbus_write_register(ctx, SETTINGS[i].address,
+                SETTINGS[i].value);
+            printf("%d\n", ret);
+        }
         // here should be: all settings written, speed is 9600, mode: MMI
 
-        // 3) NO NEED. no communication of not in match ||| depending on MAP, read out connection speed. is it in match? REG_F_BAUDRATE for FLOMAC,
-        // 4) - II  -  DONE if we are NOT in FloMAC - switch to Flomac
-        // 5) - IV  - write all recommended field before switching, switch speed
-        // 6) - III - DONE reconnect with new speed
-        // 7) write required fields
-
+        modbus_close(ctx);
         modbus_free(ctx);
     } else {
         fprintf(stderr, "Unable to create the libmodbus context\n");
@@ -208,5 +257,29 @@ int open_connect_modbus(modbus_t **ctx, const char *device, int baudrate)
         return -4;
     }
     return 0;
+}
+
+int settingsSortDesc(const void *a, const void *b)
+{
+    struct _configuration_prop * left = (struct _configuration_prop*)a;
+    struct _configuration_prop * right = (struct _configuration_prop*)b;
+    if(left->attribution != right->attribution)
+    {
+        if( left->attribution < right->attribution)
+            return -1;
+        return 1;
+    }
+    if( left->isCoil != right->isCoil)
+    {
+        if (left->isCoil)
+            return -1;
+        return 1;
+    }
+    if( left->address != right->address)
+    {
+        return left->address - right->address;
+    }
+
+    return left - right;
 }
 
