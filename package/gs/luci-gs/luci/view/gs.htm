@@ -82,6 +82,8 @@ function get_show_data(){
                         let settings_left = resp.settings_left
                         len = settings_left.length
                         for (let k = 0; k < len; k++) {
+                            if(! settings_left[k].hasOwnProperty('button_text'))
+                            {
                                  generateSettings("settings_left",
                                          settings_left[k].name,
                                          settings_left[k].value,
@@ -90,11 +92,16 @@ function get_show_data(){
                                          settings_left[k].field_type,
                                          settings_left[k].field_options
                                  )
+                            } else {
+                                generateSettingsExt("settings_left", settings_left[k])
+                            }
                         }
 
                         let settings_right = resp.settings_right
                         len = settings_right.length
                         for (let k = 0; k < len; k++) {
+                            if(! settings_left[k].hasOwnProperty('button_text'))
+                            {
                                  generateSettings("settings_right",
                                          settings_right[k].name,
                                          settings_right[k].value,
@@ -103,6 +110,9 @@ function get_show_data(){
                                          settings_right[k].field_type,
                                          settings_right[k].field_options
                                  )
+                            } else {
+                                generateSettingsExt("settings_left", settings_left[k])
+                            }
                         }
 
                 })
@@ -216,6 +226,17 @@ function generateSettingsButton(class_name, row_id)  {
         return col
 }
 
+function generateSettingsButtonExt(class_name, row_id, text)  {
+        let col = document.createElement("BUTTON")
+        // col.setAttribute("type", "button");
+        col.className = class_name
+        col.innerText = text
+        col.myParam = row_id
+        col.addEventListener("click", settingsButtonClick)
+        return col
+}
+
+
 function generateGpioOption(class_name, text)  {
         let col = document.createElement("div")
         col.className = class_name
@@ -322,6 +343,18 @@ function generateSettings(id, name, value, label, explanation, field_type, field
         trow.appendChild(generateSettingsField("tdfield", generateSettingsValue(value), field_type, field_options))
         trow.appendChild(generateSettingsButton("tdbutton", trow.id))
 }
+function generateSettingsExt(id, obj) {
+        let table = document.getElementById(id)
+        let trow = document.createElement("div")
+        trow.className = "trb"
+        trow.id = id + '.' + obj.name
+
+        table.appendChild(trow)
+        trow.appendChild(generateSettingsOption("td", generateSettingsName(obj.label), obj.explanation))
+        trow.appendChild(generateSettingsField("tdfield", generateSettingsValue(obj.value), obj.field_type, obj.field_options))
+        trow.appendChild(generateSettingsButtonExt("tdbutton", trow.id, obj.button_text))
+}
+
 
 function generateGpioHead(table) {
         let thead = document.createElement("div")

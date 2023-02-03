@@ -177,7 +177,19 @@ function gs_state_get()
     local relay_middle_number = gpio_number_to_relay_code(relay_middle_gpio)
     local relay_high_number = gpio_number_to_relay_code(relay_high_gpio)
 
+    -- TODO read somehow which direction is enabled
+    local make_initial_setup = 0
+
 	result.settings_left = {
+        {
+	        name = "initial_setup",
+	        value = make_initial_setup,
+	        label = "Конфигурация массомера",
+	        explanation = "Инициализация начальных настроек массомера",
+	        field_type = "dropdown",
+	        field_options = { ["0"]='Прямое', ["1"]='Реверсивное' },
+            button_text = "Задать"
+        },
 	    {
 	        name = "enabled",
 	        value = is_enabled,
@@ -350,6 +362,15 @@ function gs_state_get()
     relay_high_number = gpio_number_to_relay_code(relay_high_gpio)
 
 	result.settings_right = {
+        {
+	        name = "initial_setup",
+	        value = make_initial_setup,
+	        label = "Конфигурация массомера",
+	        explanation = "Инициализация начальных настроек массомера",
+	        field_type = "dropdown",
+	        field_options = { ["0"]='Прямое', ["1"]='Реверсивное' },
+            button_text = "Задать"
+        },
 	    {
 	        name = "enabled",
 	        value = is_enabled,
@@ -568,6 +589,8 @@ function gs_settings_set()
 	param = luci.http.formvalue('param')
 	value = luci.http.formvalue('value')
 
+    needHook = false
+
     if side == 'settings_left' then
         side = '1'
     elseif side == 'settings_right' then
@@ -619,6 +642,8 @@ function gs_settings_set()
         param = 'modbus_port'
     elseif param == 'selfcheck_mode' then
         param = 'selfcheck_mode'
+    elseif param == 'initial_setup' then
+        needHook = true
     else
         luci.http.prepare_content("text/plain; charset=utf-8")
         luci.http.write('ERROR. unknown param: ' .. param);
@@ -629,9 +654,27 @@ function gs_settings_set()
         file = '/tmp/gs_selfcheck'
     end
 
-    luci.sys.exec('echo ' .. value .. ' > ' .. '/tmp/log.txt')
-    luci.sys.exec('echo ' .. file .. ' >> ' .. '/tmp/log.txt')
-    luci.sys.exec('echo ' .. value .. ' > ' .. file)
+    if needHook then
+        local flomac_address = nixio.fs.readfile(
+                '/mnt/gs/'.. side ..'/modbus_address'):sub(1,-2)
+        luci.sys.exec('/etc/init.d/gs stop')
+        local device_name = "/dev/ttymxc"
+        if side == 1 then
+            device_name = device_name .. '4'
+        else
+            device_name = device_name .. '5'
+        end
+        local command = 'mmsu -b 9600 -d '.. device_name .. '-a '.. flomac_address
+        if value == 0 then
+            command = command .. '-s '
+        else
+            command = command .. '-r '
+        luci.sys.exec(command)
+    else
+        luci.sys.exec('echo ' .. value .. ' > ' .. '/tmp/log.txt')
+        luci.sys.exec('echo ' .. file .. ' >> ' .. '/tmp/log.txt')
+        luci.sys.exec('echo ' .. value .. ' > ' .. file)
+    end
 
     local result = {
 	    {
